@@ -69,6 +69,12 @@ func getNewName(oldName string, seasonNum int, epNum int) string {
 		return re.ReplaceAllString(oldName, fmt.Sprintf("S%02dE%02d", seasonNum, epNum))
 	}
 
+	// Search for something who start by E01 or E1
+	re = regexp.MustCompile("^E[0-9]+")
+	if re.MatchString(oldName) {
+		return re.ReplaceAllString(oldName, fmt.Sprintf("S%02dE%02d", seasonNum, epNum))
+	}
+
 	// Search for something like _001_ or _01_ or 001.
 	re = regexp.MustCompile("[_ ][0-9]+[_ .]")
 	if re.MatchString(oldName) {
