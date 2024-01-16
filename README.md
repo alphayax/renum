@@ -1,34 +1,59 @@
 # Renum
 
-A easy way to rename and re-numbering files in a directory.
+Renum is a simple and efficient tool written in Go, designed to rename and renumber files in a directory. It's particularly useful for renaming series of files with a specific pattern.
 
-## Usage (example)
+## Features
 
-Giving a folder with the following files:
+- Rename files in a directory based on a specific pattern.
+- Preview the changes before applying them.
+- Easy to use with a simple command line interface.
 
-```
-ls -l /tmp/renum-test/
-total 0
--rw-rw-r-- 1 alphayax alphayax 0 janv. 16 14:49 '[XXX-Fansub]_Xxx_Xxxxx_1086_[VOSTFR][FHD_1920x1080].xxx'
--rw-rw-r-- 1 alphayax alphayax 0 janv. 16 14:49 '[XXX-Fansub]_Xxx_Xxxxx_1087_[VOSTFR][FHD_1920x1080].xxx'
--rw-rw-r-- 1 alphayax alphayax 0 janv. 16 14:49 '[XXX-Fansub]_Xxx_Xxxxx_1088_[VOSTFR][FHD_1920x1080].xxx'
--rw-rw-r-- 1 alphayax alphayax 0 janv. 16 14:49 '[XXX-Fansub]_Xxx_Xxxxx_1089_[VOSTFR][FHD_1920x1080].xxx'
--rw-rw-r-- 1 alphayax alphayax 0 janv. 16 14:49 '[XXX-Fansub]_Xxx_Xxxxx_1090_[VOSTFR][FHD_1920x1080].xxx'
-```
-
-You can rename them with the following command:
+## Installation
+To install Renum, you need to have Go installed on your machine. Once you have Go installed, you can download and install Renum using the `go get` command:
 
 ```bash
-renum --season 12 /tmp/renum-test/
+go install github.com/alphayax/renum@latest
 ```
 
-And you will get:
+## Usage
+To use Renum, navigate to the directory containing the files you want to rename and run the following command:
+```bash
+renum [options]
+```
+Here are the available options:  
+--season: The season number to start from.
+--episode: The episode number to start from.
+--dry-run: Preview the changes without applying them.
 
+## Examples
+
+Let's say you have a directory containing the following files:
 ```
-2024/01/16 14:50:17 [Preview] [XXX-Fansub]_Xxx_Xxxxx_1086_[VOSTFR][FHD_1920x1080].xxx -> [XXX-Fansub]_Xxx_Xxxxx_S12E01_[VOSTFR][FHD_1920x1080].xxx
-2024/01/16 14:50:17 [Preview] [XXX-Fansub]_Xxx_Xxxxx_1087_[VOSTFR][FHD_1920x1080].xxx -> [XXX-Fansub]_Xxx_Xxxxx_S12E02_[VOSTFR][FHD_1920x1080].xxx
-2024/01/16 14:50:17 [Preview] [XXX-Fansub]_Xxx_Xxxxx_1088_[VOSTFR][FHD_1920x1080].xxx -> [XXX-Fansub]_Xxx_Xxxxx_S12E03_[VOSTFR][FHD_1920x1080].xxx
-2024/01/16 14:50:17 [Preview] [XXX-Fansub]_Xxx_Xxxxx_1089_[VOSTFR][FHD_1920x1080].xxx -> [XXX-Fansub]_Xxx_Xxxxx_S12E04_[VOSTFR][FHD_1920x1080].xxx
-2024/01/16 14:50:17 [Preview] [XXX-Fansub]_Xxx_Xxxxx_1090_[VOSTFR][FHD_1920x1080].xxx -> [XXX-Fansub]_Xxx_Xxxxx_S12E05_[VOSTFR][FHD_1920x1080].xxx
-Do you want to continue the operation? (y/N): 
+XXX-Fansub]_Xxx_Xxxxx_1086_[VOSTFR][FHD_1920x1080].xxx
+XXX-Fansub]_Xxx_Xxxxx_1087_[VOSTFR][FHD_1920x1080].xxx
+XXX-Fansub]_Xxx_Xxxxx_1088_[VOSTFR][FHD_1920x1080].xxx
 ```
+
+To rename these files, you can run the following command:
+```bash
+renum --season 12 --episode 1 /path/to/directory
+```
+
+This will rename the files to:
+```
+[XXX-Fansub]_Xxx_Xxxxx_S12E01_[VOSTFR][FHD_1920x1080].xxx
+[XXX-Fansub]_Xxx_Xxxxx_S12E02_[VOSTFR][FHD_1920x1080].xxx
+[XXX-Fansub]_Xxx_Xxxxx_S12E03_[VOSTFR][FHD_1920x1080].xxx
+```
+
+
+## Testing
+To run the tests for Renum, navigate to the project directory and run the following command:
+```bash
+go test ./...
+```
+
+
+## Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
+
