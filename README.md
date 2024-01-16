@@ -69,3 +69,9 @@ go test ./...
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+
+## Sponsoring
+Feel free to send crypto donations to the following addresses:
+- Solana (SOL): `HUC9MmKR6iCtxu25h8hsgnVqXzeQMTK9ThQSLMFYNJBC`
+- Ethereum (ETH): `0xc12Ef701Dd7e5060f441b30fE569D8D7E8a230a7`
+- Bitcoin (BTC): `bc1qv7g3d8u9svn4w0pzfjafa7jzyglwjfkzjuc73g`
