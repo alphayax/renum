@@ -30,18 +30,10 @@ func main() {
 		log.Println("[DRY RUN] Dry run mode enabled, nothing will be changed")
 	}
 
-	files, err := os.ReadDir(folder)
-	if err != nil {
-		log.Fatal(err)
-	}
+	fileNames := getFolderFileNames(folder)
 
-	renumFiles := make([]*RenumFile, len(files))
-	i := 0
-	for _, file := range files {
-		renumFiles[i] = NewRenumFile(file.Name(), uint(*seasonNum), uint(*epNum+i))
-		renumFiles[i].Preview()
-		i++
-	}
+	renumFolder := NewRenumFolder(uint(*seasonNum), uint(*epNum), folder, fileNames)
+	renumFolder.Preview()
 
 	if dryRun != nil && *dryRun {
 		log.Println("[DRY RUN] Exiting...")
@@ -55,11 +47,7 @@ func main() {
 	}
 
 	log.Println("Continuing the operation...")
-	for _, renumFile := range renumFiles {
-		if err := renumFile.Rename(folder); err != nil {
-			log.Fatal(err)
-		}
-	}
+	renumFolder.Rename()
 }
 
 func isOperationConfirmed() bool {
@@ -71,4 +59,18 @@ func isOperationConfirmed() bool {
 
 	response = strings.ToLower(strings.TrimSpace(response))
 	return response == "y"
+}
+
+func getFolderFileNames(folderPath string) []string {
+	files, err := os.ReadDir(folderPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// TODO: Exclude directories
+	fileName := make([]string, len(files))
+	for i, file := range files {
+		fileName[i] = file.Name()
+	}
+	return fileName
 }
