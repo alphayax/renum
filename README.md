@@ -9,6 +9,13 @@ Renum is a simple and efficient tool written in Go, designed to rename and renum
 - Easy to use with a simple command line interface.
 
 ## Installation
+
+### Using pre-built Packages
+
+`renum` is available for Windows, Linux and macOS. You can download the latest version from the [releases page](https://github.com/alphayax/renum/releases).
+
+### Using Go
+
 To install Renum, you need to have Go installed on your machine. Once you have Go installed, you can download and install Renum using the `go get` command:
 
 ```bash
@@ -20,10 +27,10 @@ To use Renum, navigate to the directory containing the files you want to rename 
 ```bash
 renum [options]
 ```
-Here are the available options:  
---season: The season number to start from.
---episode: The episode number to start from.
---dry-run: Preview the changes without applying them.
+Here are the available options: 
+- `--season`: The season number to start from.
+- `--episode`: The episode number to start from.
+- `--dry-run`: Preview the changes without applying them.
 
 ## Examples
 
