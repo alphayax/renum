@@ -30,8 +30,9 @@ To use Renum, navigate to the directory containing the files you want to rename 
 renum [options]
 ```
 Here are the available options: 
-- `--season`: The season number to start from.
-- `--episode`: The episode number to start from.
+- `-s`, `--season`: The season number to use.
+- `-e`, `--episode`: The episode number to start from. Will be incremented for each file.
+- `-h`, `--help`: Display the help message.
 - `--dry-run`: Preview the changes without applying them.
 
 ## Examples

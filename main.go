@@ -9,9 +9,15 @@ import (
 )
 
 func main() {
-	seasonNum := flag.Int("season", 1, "New season number")
-	epNum := flag.Int("episode", 1, "Starting episode number")
-	dryRun := flag.Bool("dry-run", false, "Does nothing, just print the new names")
+	var seasonNum, epNum uint
+	var dryRun, help bool
+	flag.UintVar(&seasonNum, "season", 1, "New season number")
+	flag.UintVar(&seasonNum, "s", 1, "New season number")
+	flag.UintVar(&epNum, "episode", 1, "Starting episode number")
+	flag.UintVar(&epNum, "e", 1, "Starting episode number")
+	flag.BoolVar(&dryRun, "dry-run", false, "Does nothing, just print the new names")
+	flag.BoolVar(&help, "h", false, "Print this help message")
+	flag.BoolVar(&help, "help", false, "Print this help message")
 	flag.Parse()
 	NArg := flag.NArg()
 	folder := flag.Arg(0)
@@ -21,21 +27,21 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	if NArg != 1 {
+	if NArg != 1 || help {
 		flag.Usage()
 		os.Exit(1)
 	}
 
-	if dryRun != nil && *dryRun {
+	if dryRun {
 		log.Println("[DRY RUN] Dry run mode enabled, nothing will be changed")
 	}
 
 	fileNames := getFolderFileNames(folder)
 
-	renumFolder := NewRenumFolder(uint(*seasonNum), uint(*epNum), folder, fileNames)
+	renumFolder := NewRenumFolder(seasonNum, epNum, folder, fileNames)
 	renumFolder.Preview()
 
-	if dryRun != nil && *dryRun {
+	if dryRun {
 		log.Println("[DRY RUN] Exiting...")
 		os.Exit(0)
 	}
