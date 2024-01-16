@@ -10,6 +10,7 @@ import (
 
 func main() {
 	seasonNum := flag.Int("season", 1, "New season number")
+	epNum := flag.Int("episode", 1, "Starting episode number")
 	dryRun := flag.Bool("dry-run", false, "Does nothing, just print the new names")
 	flag.Parse()
 	NArg := flag.NArg()
@@ -35,12 +36,11 @@ func main() {
 	}
 
 	renumFiles := make([]*RenumFile, len(files))
-	epNum := 0
+	i := 0
 	for _, file := range files {
-		epNum = epNum + 1
-
-		renumFiles[epNum-1] = NewRenumFile(file.Name(), uint(*seasonNum), uint(epNum))
-		renumFiles[epNum-1].Preview()
+		renumFiles[i] = NewRenumFile(file.Name(), uint(*seasonNum), uint(*epNum+i))
+		renumFiles[i].Preview()
+		i++
 	}
 
 	if dryRun != nil && *dryRun {
