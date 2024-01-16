@@ -34,6 +34,7 @@ Here are the available options:
 - `-s`, `--season`: The season number to use.
 - `-e`, `--episode`: The episode number to start from. Will be incremented for each file.
 - `-h`, `--help`: Display the help message.
+- `--force`: Don't ask for confirmation before applying the changes.
 - `--dry-run`: Preview the changes without applying them.
 
 ## Examples

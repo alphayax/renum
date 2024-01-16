@@ -10,7 +10,7 @@ import (
 
 func main() {
 	var seasonNum, epNum uint
-	var dryRun, help bool
+	var dryRun, help, force bool
 	flag.UintVar(&seasonNum, "season", 1, "New season number")
 	flag.UintVar(&seasonNum, "s", 1, "New season number")
 	flag.UintVar(&epNum, "episode", 1, "Starting episode number")
@@ -18,16 +18,15 @@ func main() {
 	flag.BoolVar(&dryRun, "dry-run", false, "Does nothing, just print the new names")
 	flag.BoolVar(&help, "h", false, "Print this help message")
 	flag.BoolVar(&help, "help", false, "Print this help message")
+	flag.BoolVar(&force, "force", false, "Don't ask for confirmation")
 	flag.Parse()
-	NArg := flag.NArg()
-	folder := flag.Arg(0)
 	flag.Usage = func() {
-		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Usage: renum [options] <folder>")
+		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Usage: renum [options] <folderPath>")
 		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Options:")
 		flag.PrintDefaults()
 	}
 
-	if NArg != 1 || help {
+	if flag.NArg() != 1 || help {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -36,9 +35,9 @@ func main() {
 		log.Println("[DRY RUN] Dry run mode enabled, nothing will be changed")
 	}
 
-	fileNames := getFolderFileNames(folder)
-
-	renumFolder := NewRenumFolder(seasonNum, epNum, folder, fileNames)
+	folderPath := flag.Arg(0)
+	fileNames := getFolderFileNames(folderPath)
+	renumFolder := NewRenumFolder(seasonNum, epNum, folderPath, fileNames)
 	renumFolder.Preview()
 
 	if dryRun {
@@ -47,7 +46,7 @@ func main() {
 	}
 
 	// Ask for confirmation
-	if !isOperationConfirmed() {
+	if !isOperationConfirmed(force) {
 		log.Println("Aborting the operation...")
 		os.Exit(-1)
 	}
@@ -56,7 +55,11 @@ func main() {
 	renumFolder.Rename()
 }
 
-func isOperationConfirmed() bool {
+func isOperationConfirmed(force bool) bool {
+	if force {
+		return true
+	}
+
 	fmt.Print("Do you want to continue the operation? (y/N): ")
 	var response string
 	if _, err := fmt.Scanln(&response); err != nil {
