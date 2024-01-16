@@ -1,6 +1,7 @@
 # Renum
 
 [![GitHub release](https://img.shields.io/github/v/release/alphayax/renum)](https://github.com/alphayax/renum/releases/latest)
+[![Go Report Card](https://goreportcard.com/badge/github.com/alphayax/renum)](https://goreportcard.com/report/github.com/alphayax/renum)
 
 Renum is a simple and efficient tool written in Go, designed to rename and renumber files in a directory. It's particularly useful for renaming series of files with a specific pattern.
 
