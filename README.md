@@ -28,7 +28,7 @@ go install github.com/alphayax/renum@latest
 ## Usage
 To use Renum, navigate to the directory containing the files you want to rename and run the following command:
 ```bash
-renum [options]
+renum [options] /path/to/directory
 ```
 Here are the available options: 
 - `-s`, `--season`: The season number to use.
