@@ -26,7 +26,7 @@ go install github.com/alphayax/renum@latest
 ```
 
 ## Usage
-To use Renum, navigate to the directory containing the files you want to rename and run the following command:
+To use Renum, run the following command by passing the path to the directory containing the files you want to rename as last argument:
 ```bash
 renum [options] /path/to/directory
 ```
