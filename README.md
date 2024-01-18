@@ -38,10 +38,10 @@ Here are the available options:
 - `--dry-run`: Preview the changes without applying them.
 
 ### Patterns detected
-- `S[0-9]+E[0-9]+`: "S01E01".
-- ` [0-9]{1,2}x[0-9]+ `: " 1x01 " or " 01x01 ".
-- `^E[0-9]+`: starting by "E01" or "E001".
-- `[_ ][0-9]+[_ .]`: "_01_" or ""_001_" or "_0001_".
+- `S[0-9]+E[0-9]+`: containing `S1E01` or `S01E01`.
+- ` [0-9]{1,2}x[0-9]+ `: containing ` 1x01 ` or ` 01x01 `.
+- `^E[0-9]+`: starting by `E01` or `E001`...
+- `[_ ][0-9]+[_ .]`: containing `_01_` or `_001_` or `_0001_` or ` 01 ` or `001`...
 
 ## Examples
 
