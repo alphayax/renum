@@ -23,16 +23,36 @@ func TestNewRenumFile(t *testing.T) {
 	}
 }
 
+var renumFileTestData = []struct {
+	in  string
+	out string
+}{
+	{"XXXX [ABCD] - S01E01 - Lorem Ipsum [1280x1024].mkv", "XXXX [ABCD] - S02E03 - Lorem Ipsum [1280x1024].mkv"},
+	{"XXXX [ABCD] - 01x01 - Lorem Ipsum [1280x1024].mkv", "XXXX [ABCD] - S02E03 - Lorem Ipsum [1280x1024].mkv"},
+	{"XXXX [ABCD] - 1x01 - Lorem Ipsum [1280x1024].mkv", "XXXX [ABCD] - S02E03 - Lorem Ipsum [1280x1024].mkv"},
+	{"XXXX_[ABCD]_001_Lorem_Ipsum_[1280x1024].mkv", "XXXX_[ABCD]_S02E03_Lorem_Ipsum_[1280x1024].mkv"},
+	{"E01 - Lorem Ipsum [1280x1024].mkv", "S02E03 - Lorem Ipsum [1280x1024].mkv"},
+	{"ABCDEF.mkv", "ABCDEF.mkv"},
+}
+
 func TestGetNewName(t *testing.T) {
-	oldName := "XXXX [ABCD] - S01E01 - Lorem Ipsum [1280x1024].mkv"
-	seasonNum := uint(2)
-	epNum := uint(3)
-	renumFile := NewRenumFile(oldName, seasonNum, epNum)
+	for _, tt := range renumFileTestData {
+		t.Run(tt.in, func(t *testing.T) {
+			renumFile := NewRenumFile(tt.in, 2, 3)
+			if renumFile.getNewName() != tt.out {
+				t.Errorf("Expected NewName to be %s, but got %s", tt.out, renumFile.getNewName())
+			}
+		})
+	}
+}
 
-	expectedNewName := "XXXX [ABCD] - S02E03 - Lorem Ipsum [1280x1024].mkv"
-	newName := renumFile.getNewName()
-
-	if newName != expectedNewName {
-		t.Errorf("Expected NewName to be %s, but got %s", expectedNewName, newName)
+func TestString(t *testing.T) {
+	for _, tt := range renumFileTestData {
+		t.Run(tt.in, func(t *testing.T) {
+			renumFile := NewRenumFile(tt.in, 2, 3)
+			if renumFile.String() != tt.in+" -> "+tt.out {
+				t.Errorf("Expected String to be %s, but got %s", tt.in+" -> "+tt.out, renumFile.String())
+			}
+		})
 	}
 }

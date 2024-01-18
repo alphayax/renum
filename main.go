@@ -37,8 +37,10 @@ func main() {
 
 	folderPath := flag.Arg(0)
 	fileNames := getFolderFileNames(folderPath)
-	renumFolder := NewRenumFolder(seasonNum, epNum, folderPath, fileNames)
-	renumFolder.Preview()
+	renumFolder := NewRenumFolder(seasonNum, epNum, fileNames)
+	for _, file := range renumFolder.RenumFiles {
+		log.Printf("[Preview] %s\n", file.String())
+	}
 
 	if dryRun {
 		log.Println("[DRY RUN] Exiting...")
@@ -52,7 +54,15 @@ func main() {
 	}
 
 	log.Println("Continuing the operation...")
-	renumFolder.Rename()
+	for _, file := range renumFolder.RenumFiles {
+		log.Printf("[Rename] %s\n", file.String())
+		if err := os.Rename(
+			fmt.Sprintf("%s/%s", folderPath, file.OldName),
+			fmt.Sprintf("%s/%s", folderPath, file.NewName),
+		); err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func isOperationConfirmed(force bool) bool {
