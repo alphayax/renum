@@ -30,14 +30,14 @@ To use Renum, run the following command by passing the path to the directory con
 ```bash
 renum [options] /path/to/directory
 ```
-Here are the available options: 
+### Options
 - `-s`, `--season`: The season number to use.
 - `-e`, `--episode`: The episode number to start from. Will be incremented for each file.
 - `-h`, `--help`: Display the help message.
 - `--force`: Don't ask for confirmation before applying the changes.
 - `--dry-run`: Preview the changes without applying them.
 
-### Patterns detected
+### Filename patterns detected
 - `S[0-9]+E[0-9]+`: containing `S1E01` or `S01E01`.
 - ` [0-9]{1,2}x[0-9]+ `: containing ` 1x01 ` or ` 01x01 `.
 - `^E[0-9]+`: starting by `E01` or `E001`...
