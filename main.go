@@ -9,46 +9,34 @@ import (
 )
 
 func main() {
-	var seasonNum, epNum uint
-	var dryRun, help, force bool
-	flag.UintVar(&seasonNum, "season", 1, "New season number")
-	flag.UintVar(&seasonNum, "s", 1, "New season number")
-	flag.UintVar(&epNum, "episode", 1, "Starting episode number")
-	flag.UintVar(&epNum, "e", 1, "Starting episode number")
-	flag.BoolVar(&dryRun, "dry-run", false, "Does nothing, just print the new names")
-	flag.BoolVar(&help, "h", false, "Print this help message")
-	flag.BoolVar(&help, "help", false, "Print this help message")
-	flag.BoolVar(&force, "force", false, "Don't ask for confirmation")
-	flag.Parse()
-	flag.Usage = func() {
-		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Usage: renum [options] <folderPath>")
-		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Options:")
-		flag.PrintDefaults()
-	}
-
-	if flag.NArg() != 1 || help {
+	config := NewConfig()
+	if err := config.Parse(); err != nil {
+		fmt.Println(err)
 		flag.Usage()
 		os.Exit(1)
 	}
-
-	if dryRun {
+	if config.Help {
+		flag.Usage()
+		os.Exit(0)
+	}
+	if config.DryRun {
 		log.Println("[DRY RUN] Dry run mode enabled, nothing will be changed")
 	}
 
 	folderPath := flag.Arg(0)
 	fileNames := getFolderFileNames(folderPath)
-	renumFolder := NewRenumFolder(seasonNum, epNum, fileNames)
+	renumFolder := NewRenumFolder(config.SeasonNum, config.EpNum, fileNames)
 	for _, file := range renumFolder.RenumFiles {
 		log.Printf("[Preview] %s\n", file.String())
 	}
 
-	if dryRun {
+	if config.DryRun {
 		log.Println("[DRY RUN] Exiting...")
 		os.Exit(0)
 	}
 
 	// Ask for confirmation
-	if !isOperationConfirmed(force) {
+	if !isOperationConfirmed(config.Force) {
 		log.Println("Aborting the operation...")
 		os.Exit(-1)
 	}
