@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -12,19 +11,18 @@ func main() {
 	config := NewConfig()
 	if err := config.Parse(); err != nil {
 		fmt.Println(err)
-		flag.Usage()
+		config.Usage()
 		os.Exit(1)
 	}
 	if config.Help {
-		flag.Usage()
+		config.Usage()
 		os.Exit(0)
 	}
 	if config.DryRun {
 		log.Println("[DRY RUN] Dry run mode enabled, nothing will be changed")
 	}
 
-	folderPath := flag.Arg(0)
-	fileNames := getFolderFileNames(folderPath)
+	fileNames := getFolderFileNames(config.Folder)
 	renumFolder := NewRenumFolder(config.SeasonNum, config.EpNum, fileNames)
 	for _, file := range renumFolder.RenumFiles {
 		log.Printf("[Preview] %s\n", file.String())
@@ -45,8 +43,8 @@ func main() {
 	for _, file := range renumFolder.RenumFiles {
 		log.Printf("[Rename] %s\n", file.String())
 		if err := os.Rename(
-			fmt.Sprintf("%s/%s", folderPath, file.OldName),
-			fmt.Sprintf("%s/%s", folderPath, file.NewName),
+			fmt.Sprintf("%s/%s", config.Folder, file.OldName),
+			fmt.Sprintf("%s/%s", config.Folder, file.NewName),
 		); err != nil {
 			log.Fatal(err)
 		}

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -80,5 +82,21 @@ func TestParseConfigBad(t *testing.T) {
 
 	if err := config.Parse(); err == nil {
 		t.Errorf("Expected error, but got nil")
+	}
+}
+
+func TestUsage(t *testing.T) {
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	config := NewConfig()
+	buf := new(bytes.Buffer)
+	flag.CommandLine.SetOutput(buf)
+	config.Usage()
+	str := buf.String()
+	lines := strings.Split(str, "\n")
+	if lines[0] != "Usage: renum [options] <folderPath>" {
+		t.Errorf("Expected first line to be 'Usage: renum [options] <folderPath>', but got '%s'", lines[0])
+	}
+	if lines[1] != "Options:" {
+		t.Errorf("Expected second line to be 'Options:', but got '%s'", lines[1])
 	}
 }

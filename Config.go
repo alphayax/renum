@@ -32,20 +32,24 @@ func NewConfig() *Config {
 	flag.BoolVar(&c.Help, "h", false, "Print this help message")
 	flag.BoolVar(&c.Help, "help", false, "Print this help message")
 	flag.BoolVar(&c.Force, "force", false, "Don't ask for confirmation")
+	flag.Usage = func() {
+		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Usage: renum [options] <folderPath>")
+		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Options:")
+		flag.PrintDefaults()
+	}
 
 	return c
 }
 
 func (c *Config) Parse() error {
 	flag.Parse()
-	flag.Usage = func() {
-		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Usage: renum [options] <folderPath>")
-		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Options:")
-		flag.PrintDefaults()
-	}
 	if flag.NArg() != 1 {
 		return fmt.Errorf("invalid number of arguments (got %d, expected 1)", flag.NArg())
 	}
 	c.Folder = flag.Arg(0)
 	return nil
+}
+
+func (c *Config) Usage() {
+	flag.Usage()
 }
