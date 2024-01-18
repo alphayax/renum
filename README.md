@@ -37,6 +37,12 @@ Here are the available options:
 - `--force`: Don't ask for confirmation before applying the changes.
 - `--dry-run`: Preview the changes without applying them.
 
+### Patterns detected
+- `S[0-9]+E[0-9]+`: "S01E01".
+- ` [0-9]{1,2}x[0-9]+ `: " 1x01 " or " 01x01 ".
+- `^E[0-9]+`: starting by "E01" or "E001".
+- `[_ ][0-9]+[_ .]`: "_01_" or ""_001_" or "_0001_".
+
 ## Examples
 
 Let's say you have a directory containing the following files:
