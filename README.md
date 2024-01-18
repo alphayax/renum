@@ -25,6 +25,14 @@ To install Renum, you need to have Go installed on your machine. Once you have G
 go install github.com/alphayax/renum@latest
 ```
 
+### Using Docker
+
+You can also use Renum with Docker. To do so, you can run the following command:
+
+```bash
+docker run --rm -it -v /path/to/directory:/data alphayax/renum:latest [options] /data
+```
+
 ## Usage
 To use Renum, run the following command by passing the path to the directory containing the files you want to rename as last argument:
 ```bash
