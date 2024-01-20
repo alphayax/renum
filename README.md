@@ -43,6 +43,8 @@ renum [options] /path/to/directory
 - `-e <NUM>`, `--episode <NUM>`: The episode number to start from. Will be incremented for each file.
 - `-h`, `--help`: Display the help message.
 - `--force`: Don't ask for confirmation before applying the changes.
+- `--verbose`: Increase logs verbosity.
+- `--json`: Display logs in JSON format.
 - `--dry-run`: Preview the changes without applying them.
 
 ### Filename patterns detected

@@ -21,6 +21,9 @@ func main() {
 	if config.Verbose {
 		log.SetLevel(log.DebugLevel)
 	}
+	if config.Json {
+		log.SetFormatter(&log.JSONFormatter{})
+	}
 	if config.DryRun {
 		log.Infoln("[DRY RUN] Dry run mode enabled, nothing will be changed")
 	}
