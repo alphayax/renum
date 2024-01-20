@@ -25,6 +25,13 @@ func main() {
 		log.Infoln("[DRY RUN] Dry run mode enabled, nothing will be changed")
 	}
 
+	log.WithFields(log.Fields{
+		"SeasonNumber":       config.SeasonNum,
+		"startEpisodeNumber": config.EpNum,
+		"folder":             config.Folder,
+		"dryRun":             config.DryRun,
+	}).Debugln("[Config]")
+
 	fileNames := getFolderFileNames(config.Folder)
 	renumFolder := NewRenumFolder(config.SeasonNum, config.EpNum, fileNames)
 
