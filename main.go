@@ -28,7 +28,10 @@ func main() {
 	processors := getProcessors()
 	for _, file := range renumFolder.RenumFiles {
 		file.Process(processors)
-		log.Infof("[Preview] %s\n", file.String())
+		log.WithFields(log.Fields{
+			"oldName": file.OldName,
+			"newName": file.NewName,
+		}).Infoln("[Preview]")
 	}
 
 	if config.DryRun {
@@ -44,7 +47,10 @@ func main() {
 
 	log.Infoln("Continuing the operation...")
 	for _, file := range renumFolder.RenumFiles {
-		log.Infof("[Rename] %s\n", file.String())
+		log.WithFields(log.Fields{
+			"oldName": file.OldName,
+			"newName": file.NewName,
+		}).Infoln("[Rename]")
 		if err := os.Rename(
 			fmt.Sprintf("%s/%s", config.Folder, file.OldName),
 			fmt.Sprintf("%s/%s", config.Folder, file.NewName),

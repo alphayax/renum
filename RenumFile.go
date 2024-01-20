@@ -1,9 +1,5 @@
 package main
 
-import (
-	"fmt"
-)
-
 func NewRenumFile(oldName string, seasonNum uint, epNum uint) *RenumFile {
 	return &RenumFile{
 		OldName:   oldName,
@@ -31,8 +27,4 @@ func (r *RenumFile) getNewName(processors []*Processor) string {
 	}
 
 	return r.OldName
-}
-
-func (r *RenumFile) String() string {
-	return fmt.Sprintf("%s -> %s", r.OldName, r.NewName)
 }
