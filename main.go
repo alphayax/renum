@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"strings"
 )
@@ -19,7 +19,7 @@ func main() {
 		os.Exit(0)
 	}
 	if config.DryRun {
-		log.Println("[DRY RUN] Dry run mode enabled, nothing will be changed")
+		log.Infoln("[DRY RUN] Dry run mode enabled, nothing will be changed")
 	}
 
 	fileNames := getFolderFileNames(config.Folder)
@@ -28,23 +28,23 @@ func main() {
 	processors := getProcessors()
 	for _, file := range renumFolder.RenumFiles {
 		file.Process(processors)
-		log.Printf("[Preview] %s\n", file.String())
+		log.Infof("[Preview] %s\n", file.String())
 	}
 
 	if config.DryRun {
-		log.Println("[DRY RUN] Exiting...")
+		log.Infoln("[DRY RUN] Exiting...")
 		os.Exit(0)
 	}
 
 	// Ask for confirmation
 	if !isOperationConfirmed(config.Force) {
-		log.Println("Aborting the operation...")
+		log.Warningln("Aborting the operation...")
 		os.Exit(-1)
 	}
 
-	log.Println("Continuing the operation...")
+	log.Infoln("Continuing the operation...")
 	for _, file := range renumFolder.RenumFiles {
-		log.Printf("[Rename] %s\n", file.String())
+		log.Infof("[Rename] %s\n", file.String())
 		if err := os.Rename(
 			fmt.Sprintf("%s/%s", config.Folder, file.OldName),
 			fmt.Sprintf("%s/%s", config.Folder, file.NewName),
@@ -56,6 +56,7 @@ func main() {
 
 func isOperationConfirmed(force bool) bool {
 	if force {
+		log.Infoln("Force mode enabled, continuing the operation...")
 		return true
 	}
 
@@ -72,7 +73,7 @@ func isOperationConfirmed(force bool) bool {
 func getFolderFileNames(folderPath string) []string {
 	files, err := os.ReadDir(folderPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
 	// TODO: Exclude directories
