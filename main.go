@@ -82,10 +82,18 @@ func getFolderFileNames(folderPath string) []string {
 		log.Fatalln(err)
 	}
 
-	// TODO: Exclude directories
-	fileName := make([]string, len(files))
+	fileNames := make([]string, len(files))
+	folderCount := 0
 	for i, file := range files {
-		fileName[i] = file.Name()
+		if file.IsDir() {
+			folderCount++
+			continue
+		}
+		fileNames[i] = file.Name()
 	}
-	return fileName
+
+	// Resize the slice to remove the skipped folders
+	fileNames = fileNames[:len(files)-folderCount]
+
+	return fileNames
 }
