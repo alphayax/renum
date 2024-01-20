@@ -24,7 +24,10 @@ func main() {
 
 	fileNames := getFolderFileNames(config.Folder)
 	renumFolder := NewRenumFolder(config.SeasonNum, config.EpNum, fileNames)
+
+	processors := getProcessors()
 	for _, file := range renumFolder.RenumFiles {
+		file.Process(processors)
 		log.Printf("[Preview] %s\n", file.String())
 	}
 

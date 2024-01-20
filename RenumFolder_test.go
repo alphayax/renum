@@ -9,7 +9,11 @@ func TestNewRenumFolder(t *testing.T) {
 	epNum := uint(3)
 	fileNames := []string{"S01E01.mkv", "S01E02.mkv"}
 
+	processors := getProcessors()
 	renumFolder := NewRenumFolder(seasonNum, epNum, fileNames)
+	for _, renumFile := range renumFolder.RenumFiles {
+		renumFile.Process(processors)
+	}
 
 	if renumFolder.SeasonNum != seasonNum {
 		t.Errorf("Expected SeasonNum to be %d, but got %d", seasonNum, renumFolder.SeasonNum)

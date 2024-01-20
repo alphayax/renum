@@ -37,10 +37,11 @@ var renumFileTestData = []struct {
 
 func TestGetNewName(t *testing.T) {
 	for _, tt := range renumFileTestData {
+		processors := getProcessors()
 		t.Run(tt.in, func(t *testing.T) {
 			renumFile := NewRenumFile(tt.in, 2, 3)
-			if renumFile.getNewName() != tt.out {
-				t.Errorf("Expected NewName to be %s, but got %s", tt.out, renumFile.getNewName())
+			if renumFile.getNewName(processors) != tt.out {
+				t.Errorf("Expected NewName to be %s, but got %s", tt.out, renumFile.getNewName(processors))
 			}
 		})
 	}
@@ -48,8 +49,10 @@ func TestGetNewName(t *testing.T) {
 
 func TestString(t *testing.T) {
 	for _, tt := range renumFileTestData {
+		processors := getProcessors()
 		t.Run(tt.in, func(t *testing.T) {
 			renumFile := NewRenumFile(tt.in, 2, 3)
+			renumFile.Process(processors)
 			if renumFile.String() != tt.in+" -> "+tt.out {
 				t.Errorf("Expected String to be %s, but got %s", tt.in+" -> "+tt.out, renumFile.String())
 			}
