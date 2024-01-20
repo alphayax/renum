@@ -8,6 +8,7 @@ import (
 type Config struct {
 	SeasonNum uint
 	EpNum     uint
+	Verbose   bool
 	DryRun    bool
 	Help      bool
 	Force     bool
@@ -18,6 +19,7 @@ func NewConfig() *Config {
 	c := &Config{
 		SeasonNum: 1,
 		EpNum:     1,
+		Verbose:   false,
 		DryRun:    false,
 		Help:      false,
 		Force:     false,
@@ -28,6 +30,7 @@ func NewConfig() *Config {
 	flag.UintVar(&c.SeasonNum, "s", 1, "New season number")
 	flag.UintVar(&c.EpNum, "episode", 1, "Starting episode number")
 	flag.UintVar(&c.EpNum, "e", 1, "Starting episode number")
+	flag.BoolVar(&c.Verbose, "verbose", false, "Increase verbosity")
 	flag.BoolVar(&c.DryRun, "dry-run", false, "Does nothing, just print the new names")
 	flag.BoolVar(&c.Help, "h", false, "Print this help message")
 	flag.BoolVar(&c.Help, "help", false, "Print this help message")

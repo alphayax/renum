@@ -18,6 +18,9 @@ func main() {
 		config.Usage()
 		os.Exit(0)
 	}
+	if config.Verbose {
+		log.SetLevel(log.DebugLevel)
+	}
 	if config.DryRun {
 		log.Infoln("[DRY RUN] Dry run mode enabled, nothing will be changed")
 	}
@@ -26,6 +29,12 @@ func main() {
 	renumFolder := NewRenumFolder(config.SeasonNum, config.EpNum, fileNames)
 
 	processors := getProcessors()
+	for _, processor := range processors {
+		log.WithFields(log.Fields{
+			"searchRegex":   processor.SearchRegex,
+			"outputPattern": processor.OutputPattern,
+		}).Debugln("[Processor]")
+	}
 	for _, file := range renumFolder.RenumFiles {
 		file.Process(processors)
 		log.WithFields(log.Fields{
@@ -50,7 +59,7 @@ func main() {
 		log.WithFields(log.Fields{
 			"oldName": file.OldName,
 			"newName": file.NewName,
-		}).Infoln("[Rename]")
+		}).Debugln("[Rename]")
 		if err := os.Rename(
 			fmt.Sprintf("%s/%s", config.Folder, file.OldName),
 			fmt.Sprintf("%s/%s", config.Folder, file.NewName),
