@@ -38,6 +38,7 @@ To use Renum, run the following command by passing the path to the directory con
 ```bash
 renum [options] /path/to/directory
 ```
+
 ### Options
 - `-s <NUM>`, `--season <NUM>`: The season number to use.
 - `-e <NUM>`, `--episode <NUM>`: The episode number to start from. Will be incremented for each file.
@@ -46,12 +47,16 @@ renum [options] /path/to/directory
 - `--verbose`: Increase logs verbosity.
 - `--json`: Display logs in JSON format.
 - `--dry-run`: Preview the changes without applying them.
+- `--pattern <REGEX>`: Use a custom file pattern. (Will replace all the default file pattern detected)
 
-### Filename patterns detected
+### Default filename patterns detected
 - `S[0-9]+E[0-9]+`: containing `S1E01` or `S01E01`.
 - ` [0-9]{1,2}x[0-9]+ `: containing ` 1x01 ` or ` 01x01 `.
 - `^E[0-9]+`: starting by `E01` or `E001`...
 - `[_ ][0-9]+[_ .]`: containing `_01_` or `_001_` or `_0001_` or ` 01 ` or `001`...
+
+> You can use your own file pattern detection by using the `--pattern` flag with your custom regex.
+> For example: `--pattern "Season.[0-9]+.Ep.[0-9]+"` to match "Season 4 Ep 21"
 
 ## Examples
 
