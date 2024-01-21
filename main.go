@@ -28,6 +28,7 @@ func main() {
 		log.Infoln("[DRY RUN] Dry run mode enabled, nothing will be changed")
 	}
 
+	// Print config
 	log.WithFields(log.Fields{
 		"SeasonNumber":       config.SeasonNum,
 		"startEpisodeNumber": config.EpNum,
@@ -35,6 +36,7 @@ func main() {
 		"dryRun":             config.DryRun,
 	}).Debugln("[Config]")
 
+	// Get the file names to process
 	fileNames := getFolderFileNames(config.Folder)
 	renumFolder := NewRenumFolder(config.SeasonNum, config.EpNum, fileNames)
 
@@ -45,6 +47,8 @@ func main() {
 			"outputPattern": processor.OutputPattern,
 		}).Debugln("[Processor]")
 	}
+
+	// Compute new names
 	for _, file := range renumFolder.RenumFiles {
 		file.Process(processors)
 		log.WithFields(log.Fields{
@@ -64,6 +68,7 @@ func main() {
 		os.Exit(-1)
 	}
 
+	// Rename files
 	log.Infoln("Continuing the operation...")
 	for _, file := range renumFolder.RenumFiles {
 		log.WithFields(log.Fields{
@@ -88,6 +93,8 @@ func isOperationConfirmed(force bool) bool {
 	fmt.Print("Do you want to continue the operation? (y/N): ")
 	var response string
 	if _, err := fmt.Scanln(&response); err != nil {
+		log.Debugln("Error while reading the response:", err)
+		log.Debugln("Assuming the response is 'n'")
 		return false
 	}
 
@@ -98,7 +105,7 @@ func isOperationConfirmed(force bool) bool {
 func getFolderFileNames(folderPath string) []string {
 	files, err := os.ReadDir(folderPath)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("Error while reading the folder:", err)
 	}
 
 	fileNames := make([]string, len(files))
