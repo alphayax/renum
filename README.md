@@ -5,7 +5,7 @@
 
 Renum is a simple and efficient tool written in Go, designed to rename and renumber files in a directory. It's particularly useful for renaming series of files with a specific pattern.
 
-[![Renum Example](./.media/renum_1.gif)]
+![Renum Example](./.media/renum_1.gif)
 
 ## Features
 - Rename files in a directory based on a specific pattern.
