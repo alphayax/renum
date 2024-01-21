@@ -5,20 +5,19 @@
 
 Renum is a simple and efficient tool written in Go, designed to rename and renumber files in a directory. It's particularly useful for renaming series of files with a specific pattern.
 
-## Features
 
+## Features
 - Rename files in a directory based on a specific pattern.
 - Preview the changes before applying them.
 - Easy to use with a simple command line interface.
 
+
 ## Installation
 
 ### Using pre-built Packages
-
 `renum` is available for Windows, Linux and macOS. You can download the latest version from the [releases page](https://github.com/alphayax/renum/releases).
 
 ### Using Go
-
 To install Renum, you need to have Go installed on your machine. Once you have Go installed, you can download and install Renum using the `go get` command:
 
 ```bash
@@ -26,12 +25,12 @@ go install github.com/alphayax/renum@latest
 ```
 
 ### Using Docker
-
 You can also use Renum with Docker. To do so, you can run the following command:
 
 ```bash
 docker run --rm -it -v /path/to/directory:/data alphayax/renum:latest [options] /data
 ```
+
 
 ## Usage
 To use Renum, run the following command by passing the path to the directory containing the files you want to rename as last argument:
@@ -58,8 +57,8 @@ renum [options] /path/to/directory
 > You can use your own file pattern detection by using the `--pattern` flag with your custom regex.
 > For example: `--pattern "Season.[0-9]+.Ep.[0-9]+"` to match "Season 4 Ep 21"
 
-## Examples
 
+## Examples
 Let's say you have a directory containing the following files:
 ```
 [XXX-Fansub]_Xxx_Xxxxx_1086_[VOSTFR][FHD_1920x1080].xxx
