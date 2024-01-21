@@ -9,7 +9,7 @@ func TestNewRenumFolder(t *testing.T) {
 	epNum := uint(3)
 	fileNames := []string{"S01E01.mkv", "S01E02.mkv"}
 
-	processors := getProcessors()
+	processors := getDefaultProcessors()
 	renumFolder := NewRenumFolder(seasonNum, epNum, fileNames)
 	for _, renumFile := range renumFolder.RenumFiles {
 		renumFile.Process(processors)

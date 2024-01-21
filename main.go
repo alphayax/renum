@@ -34,13 +34,20 @@ func main() {
 		"startEpisodeNumber": config.EpNum,
 		"folder":             config.Folder,
 		"dryRun":             config.DryRun,
+		"force":              config.Force,
+		"searchPattern":      config.SearchPattern,
 	}).Debugln("[Config]")
 
 	// Get the file names to process
 	fileNames := getFolderFileNames(config.Folder)
 	renumFolder := NewRenumFolder(config.SeasonNum, config.EpNum, fileNames)
 
-	processors := getProcessors()
+	// Get the processors
+	processors := getDefaultProcessors()
+	if config.SearchPattern != "" {
+		processors = []*Processor{NewProcessor(config.SearchPattern, "S%02dE%02d")}
+		log.Infoln("Using custom search pattern:", config.SearchPattern)
+	}
 	for _, processor := range processors {
 		log.WithFields(log.Fields{
 			"searchRegex":   processor.SearchRegex,

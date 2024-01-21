@@ -26,7 +26,7 @@ func (p *Processor) Replace(oldName string, seasonNum uint, epNum uint) string {
 	return p.SearchRegex.ReplaceAllString(oldName, replacement)
 }
 
-func getProcessors() []*Processor {
+func getDefaultProcessors() []*Processor {
 	return []*Processor{
 		NewProcessor("S[0-9]+E[0-9]+", "S%02dE%02d"),
 		NewProcessor(" [0-9]{1,2}x[0-9]+ ", " S%02dE%02d "),

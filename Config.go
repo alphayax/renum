@@ -6,25 +6,30 @@ import (
 )
 
 type Config struct {
-	SeasonNum uint
-	EpNum     uint
-	Verbose   bool
-	Json      bool
-	DryRun    bool
-	Help      bool
-	Force     bool
-	Folder    string
+	// Options
+	SeasonNum     uint
+	EpNum         uint
+	Verbose       bool
+	Json          bool
+	DryRun        bool
+	Help          bool
+	Force         bool
+	SearchPattern string
+	// Positional arguments
+	Folder string
 }
 
 func NewConfig() *Config {
 	c := &Config{
-		SeasonNum: 1,
-		EpNum:     1,
-		Verbose:   false,
-		DryRun:    false,
-		Help:      false,
-		Force:     false,
-		Folder:    "",
+		SeasonNum:     1,
+		EpNum:         1,
+		Verbose:       false,
+		DryRun:        false,
+		Help:          false,
+		Force:         false,
+		Json:          false,
+		SearchPattern: "",
+		Folder:        "",
 	}
 
 	flag.UintVar(&c.SeasonNum, "season", 1, "New season number")
@@ -37,6 +42,7 @@ func NewConfig() *Config {
 	flag.BoolVar(&c.Help, "h", false, "Print this help message")
 	flag.BoolVar(&c.Help, "help", false, "Print this help message")
 	flag.BoolVar(&c.Force, "force", false, "Don't ask for confirmation")
+	flag.StringVar(&c.SearchPattern, "pattern", "", "Custom regex search pattern (eg: S[0-9]+E[0-9]+)")
 	flag.Usage = func() {
 		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Usage: renum [options] <folderPath>")
 		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Options:")

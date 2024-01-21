@@ -37,7 +37,7 @@ var renumFileTestData = []struct {
 
 func TestGetNewName(t *testing.T) {
 	for _, tt := range renumFileTestData {
-		processors := getProcessors()
+		processors := getDefaultProcessors()
 		t.Run(tt.in, func(t *testing.T) {
 			renumFile := NewRenumFile(tt.in, 2, 3)
 			if renumFile.getNewName(processors) != tt.out {
