@@ -10,6 +10,7 @@ Renum is a simple and efficient tool written in Go, designed to rename and renum
 ## Features
 - Rename files in a directory based on a specific pattern.
 - Preview the changes before applying them.
+- Never overwrites a file: a batch that would destroy data is refused upfront.
 - Easy to use with a simple command line interface.
 
 
@@ -57,6 +58,30 @@ renum [options] /path/to/directory
 
 > You can use your own file pattern detection by using the `--pattern` flag with your custom regex.
 > For example: `--pattern "Season.[0-9]+.Ep.[0-9]+"` to match "Season 4 Ep 21"
+
+
+### Safety
+Renaming a batch of files can silently destroy data, so Renum checks the whole
+batch **before** touching a single file, and aborts without any change if:
+- two files would end up with the same name;
+- a new name would overwrite a file that the batch does not rename away.
+
+These checks also run in `--dry-run`, so a preview tells you whether the batch is
+safe to apply.
+
+Renum renames files in an order that keeps every file, which means shifting a
+range of episodes works in both directions. For instance, `--episode 2` on a
+folder holding `S01E01` and `S01E02` yields `S01E02` and `S01E03` without losing
+the original `S01E02`.
+
+Sub-folders are ignored: only the files directly inside the given directory are
+renamed, and they never get a name that would move them out of it.
+
+
+### Exit codes
+- `0`: success, or nothing to rename.
+- `1`: invalid arguments, unreadable folder, invalid `--pattern`, unsafe batch,
+  operation declined at the confirmation prompt, or a rename failure.
 
 
 ## Examples
