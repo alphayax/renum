@@ -53,6 +53,9 @@ func getDefaultProcessors() []*Processor {
 		MustNewProcessor("S[0-9]+E[0-9]+", defaultOutputPattern),
 		MustNewProcessor(" [0-9]{1,2}x[0-9]+ ", " "+defaultOutputPattern+" "),
 		MustNewProcessor("^E[0-9]+", defaultOutputPattern),
-		MustNewProcessor("[_ ][0-9]+[_ .]", "_"+defaultOutputPattern+"_"),
+		// The surrounding separators are captured and put back as they were:
+		// replacing them by underscores turned "serie 1.mkv" into
+		// "serie_S01E01_mkv", stripping the extension off the file.
+		MustNewProcessor("([_ ])[0-9]+([_ .])", "${1}"+defaultOutputPattern+"${2}"),
 	}
 }

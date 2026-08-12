@@ -54,10 +54,31 @@ renum [options] /path/to/directory
 - `S[0-9]+E[0-9]+`: containing `S1E01` or `S01E01`.
 - ` [0-9]{1,2}x[0-9]+ `: containing ` 1x01 ` or ` 01x01 `.
 - `^E[0-9]+`: starting by `E01` or `E001`...
-- `[_ ][0-9]+[_ .]`: containing `_01_` or `_001_` or `_0001_` or ` 01 ` or `001`...
+- `([_ ])[0-9]+([_ .])`: containing `_01_` or `_001_` or `_0001_` or ` 01 ` or `001`...
+  The separators around the number are kept as they were, so the extension of
+  `serie 1.mkv` survives.
 
 > You can use your own file pattern detection by using the `--pattern` flag with your custom regex.
 > For example: `--pattern "Season.[0-9]+.Ep.[0-9]+"` to match "Season 4 Ep 21"
+
+
+### Episode numbering
+Files are grouped into episodes by their name without the extension, and all the
+files of one episode get the same number. A video and its subtitle therefore stay
+together:
+
+```
+Show S01E01.mkv     ->  Show S02E01.mkv
+Show S01E01.srt     ->  Show S02E01.srt
+Show S01E02.mkv     ->  Show S02E02.mkv
+Show S01E02.srt     ->  Show S02E02.srt
+```
+
+A file that no pattern matches is not an episode: it is left untouched and does
+not consume a number, so a stray `cover.jpg` no longer shifts the whole folder.
+
+> A subtitle carrying a language in its name, such as `Show S01E01.fr.srt`,
+> counts as its own episode: only the last extension is dropped when grouping.
 
 
 ### Safety

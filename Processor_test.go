@@ -61,3 +61,21 @@ func TestGetDefaultProcessors(t *testing.T) {
 		t.Errorf("Expected the default processors not to be empty")
 	}
 }
+
+// The separator pattern used to swallow the dot of the extension, turning
+// "serie 1.mkv" into "serie_S01E01_mkv".
+func TestDefaultProcessorsKeepTheExtension(t *testing.T) {
+	cases := map[string]string{
+		"serie 1.mkv":                     "serie S01E01.mkv",
+		"serie_1.mkv":                     "serie_S01E01.mkv",
+		"serie 1 x.mkv":                   "serie S01E01 x.mkv",
+		"[Fansub]_Show_1086_[VOSTFR].mkv": "[Fansub]_Show_S01E01_[VOSTFR].mkv",
+	}
+
+	for oldName, want := range cases {
+		names := newNames(NewRenumFolder(1, 1, []string{oldName}, getDefaultProcessors()))
+		if names[oldName] != want {
+			t.Errorf("Expected %q to become %q, but got %q", oldName, want, names[oldName])
+		}
+	}
+}

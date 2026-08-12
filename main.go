@@ -38,13 +38,6 @@ func main() {
 		"searchPattern":      config.SearchPattern,
 	}).Debugln("[Config]")
 
-	// Get the file names to process
-	fileNames, err := getFolderFileNames(config.Folder)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	renumFolder := NewRenumFolder(config.SeasonNum, config.EpNum, fileNames)
-
 	// Get the processors
 	processors, err := getProcessors(config)
 	if err != nil {
@@ -57,9 +50,13 @@ func main() {
 		}).Debugln("[Processor]")
 	}
 
-	// Compute new names
+	// Get the file names to process and compute the new names
+	fileNames, err := getFolderFileNames(config.Folder)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	renumFolder := NewRenumFolder(config.SeasonNum, config.EpNum, fileNames, processors)
 	for _, file := range renumFolder.RenumFiles {
-		file.Process(processors)
 		log.WithFields(log.Fields{
 			"oldName": file.OldName,
 			"newName": file.NewName,

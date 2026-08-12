@@ -77,14 +77,38 @@ patterns; keep the panicking constructor for the hard-coded defaults only.
 
 ---
 
-## Important — open
+## Important
+
+### 5. Companion files consumed episode numbers — `RenumFolder.go:19` — fixed
+
+`Show S01E01.srt` became `Show S02E02.srt`, desynchronising every subtitle from
+its video and shifting the rest of the folder.
+
+**Fix:** files are grouped into episodes by their name without the extension and
+share the episode number. A file that no processor matches is not an episode
+either: it keeps its name and no longer consumes a number, so a stray
+`cover.jpg` does not shift the folder. Only the last extension is dropped when
+grouping, so `Show S01E01.fr.srt` still counts as its own episode — documented
+in the README.
+
+`RenumFolder.FolderPath`, the dead field listed below, was removed along the way.
+
+### 6. The 4th default pattern ate the extension dot — `Processor.go:34` — fixed
+
+`serie 1.mkv` became `serie_S01E01_mkv`, which no player will open: the
+separators around the number were rewritten as underscores, the dot of the
+extension included.
+
+**Fix:** the separators are captured and put back as they were. The README
+example is unaffected, `_1086_` still yields `_S12E01_`.
+
+### Still open
 
 | # | Issue | Location |
 |---|---|---|
-| 5 | **Companion files consume episode numbers.** `Show S01E01.srt` becomes `Show S02E02.srt`, desynchronising every subtitle from its video. Files should be grouped by stem, or filtered by extension. | `RenumFolder.go:19` |
-| 6 | **The 4th default pattern eats the extension dot**: `serie 1.mkv` becomes `serie_S01E01_mkv`, which no player will open. | `Processor.go:34` |
 | 7 | `ReplaceAllString` replaces *every* occurrence: `S01E01 - rerun S01E01.mkv` is substituted twice. A single replacement would be enough. | `Processor.go:26` |
 | 8 | `os.ReadDir` sorts lexicographically, so `ep 10.mkv` comes before `ep 2.mkv`. Without natural sorting the numbering is wrong for any non zero-padded name. | `main.go:113` |
+
 Issues 9 and 10 sat inside the code rewritten for the critical fixes, so they
 were fixed along the way:
 
@@ -120,7 +144,7 @@ were fixed along the way:
 - **Go 1.20 is end of life** (`go.mod`, `Dockerfile`). Moving to 1.22+ is
   overdue; logrus is in maintenance mode and `log/slog` has been in the
   standard library since 1.21.
-- `RenumFolder.FolderPath` is declared but never set — dead field.
+- `RenumFolder.FolderPath` was declared but never set — dead field, **removed**.
 - `Config` relies on the global `flag` set, so calling `NewConfig()` twice in a
   single process panics, which makes the parsing hard to test properly. A
   dedicated `flag.NewFlagSet` would fix it.
