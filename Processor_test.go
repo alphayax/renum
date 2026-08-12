@@ -7,7 +7,10 @@ import (
 )
 
 func TestNewProcessor(t *testing.T) {
-	p := NewProcessor("S[0-9]+E[0-9]+", "S%02dE%02d")
+	p, err := NewProcessor("S[0-9]+E[0-9]+", "S%02dE%02d")
+	if err != nil {
+		t.Fatalf("Expected no error, but got %v", err)
+	}
 	if p.OutputPattern != "S%02dE%02d" {
 		t.Errorf("Expected OutputPattern to be 'S%%02dE%%02d', but got %s", p.OutputPattern)
 	}
@@ -16,8 +19,28 @@ func TestNewProcessor(t *testing.T) {
 	}
 }
 
+// An invalid --pattern must be reported as an error, never as a panic.
+func TestNewProcessorInvalidPattern(t *testing.T) {
+	p, err := NewProcessor("S[0-9", "S%02dE%02d")
+	if err == nil {
+		t.Fatalf("Expected an error for an invalid pattern, but got processor %v", p)
+	}
+	if p != nil {
+		t.Errorf("Expected a nil processor on error, but got %v", p)
+	}
+}
+
+func TestMustNewProcessor(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.Errorf("Expected MustNewProcessor to panic on an invalid pattern")
+		}
+	}()
+	MustNewProcessor("S[0-9", "S%02dE%02d")
+}
+
 func TestMatch(t *testing.T) {
-	p := NewProcessor("S[0-9]+E[0-9]+", "S%02dE%02d")
+	p := MustNewProcessor("S[0-9]+E[0-9]+", "S%02dE%02d")
 	if !p.Match("S01E01") {
 		t.Errorf("Expected Match to return true, but got false")
 	}
@@ -27,8 +50,14 @@ func TestMatch(t *testing.T) {
 }
 
 func TestReplace(t *testing.T) {
-	p := NewProcessor("S[0-9]+E[0-9]+", "S%02dE%02d")
+	p := MustNewProcessor("S[0-9]+E[0-9]+", "S%02dE%02d")
 	if p.Replace("S01E01", 2, 3) != "S02E03" {
 		t.Errorf("Expected Replace to return 'S02E03', but got %s", p.Replace("S01E01", 2, 3))
+	}
+}
+
+func TestGetDefaultProcessors(t *testing.T) {
+	if len(getDefaultProcessors()) == 0 {
+		t.Errorf("Expected the default processors not to be empty")
 	}
 }

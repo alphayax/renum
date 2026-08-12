@@ -39,14 +39,16 @@ func main() {
 	}).Debugln("[Config]")
 
 	// Get the file names to process
-	fileNames := getFolderFileNames(config.Folder)
+	fileNames, err := getFolderFileNames(config.Folder)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	renumFolder := NewRenumFolder(config.SeasonNum, config.EpNum, fileNames)
 
 	// Get the processors
-	processors := getDefaultProcessors()
-	if config.SearchPattern != "" {
-		processors = []*Processor{NewProcessor(config.SearchPattern, "S%02dE%02d")}
-		log.Infoln("Using custom search pattern:", config.SearchPattern)
+	processors, err := getProcessors(config)
+	if err != nil {
+		log.Fatalln(err)
 	}
 	for _, processor := range processors {
 		log.WithFields(log.Fields{
@@ -64,31 +66,62 @@ func main() {
 		}).Infoln("[Preview]")
 	}
 
+	// Refuse a plan that would overwrite files, before touching anything
+	plan := buildRenamePlan(renumFolder.RenumFiles)
+	if err := validateRenamePlan(config.Folder, plan); err != nil {
+		log.Errorln("The following renames would destroy files:")
+		for _, conflict := range strings.Split(err.Error(), "\n") {
+			log.Errorln("  -", conflict)
+		}
+		log.Fatalln("Aborting, no file has been changed")
+	}
+
 	if config.DryRun {
 		log.Infoln("[DRY RUN] Exiting...")
+		os.Exit(0)
+	}
+
+	if len(plan) == 0 {
+		log.Infoln("Nothing to rename")
 		os.Exit(0)
 	}
 
 	// Ask for confirmation
 	if !isOperationConfirmed(config.Force) {
 		log.Warningln("Aborting the operation...")
-		os.Exit(-1)
+		os.Exit(1)
 	}
 
 	// Rename files
 	log.Infoln("Continuing the operation...")
-	for _, file := range renumFolder.RenumFiles {
+	for _, op := range plan {
 		log.WithFields(log.Fields{
-			"oldName": file.OldName,
-			"newName": file.NewName,
+			"oldName": op.From,
+			"newName": op.To,
 		}).Debugln("[Rename]")
-		if err := os.Rename(
-			fmt.Sprintf("%s/%s", config.Folder, file.OldName),
-			fmt.Sprintf("%s/%s", config.Folder, file.NewName),
-		); err != nil {
-			log.Fatal(err)
-		}
 	}
+	if err := applyRenamePlan(config.Folder, plan); err != nil {
+		for _, failure := range strings.Split(err.Error(), "\n") {
+			log.Errorln(failure)
+		}
+		log.Fatalln("Some files could not be renamed")
+	}
+
+	log.Infof("Renamed %d file(s)", len(plan))
+}
+
+func getProcessors(config *Config) ([]*Processor, error) {
+	if config.SearchPattern == "" {
+		return getDefaultProcessors(), nil
+	}
+
+	processor, err := NewProcessor(config.SearchPattern, defaultOutputPattern)
+	if err != nil {
+		return nil, err
+	}
+	log.Infoln("Using custom search pattern:", config.SearchPattern)
+
+	return []*Processor{processor}, nil
 }
 
 func isOperationConfirmed(force bool) bool {
@@ -109,24 +142,20 @@ func isOperationConfirmed(force bool) bool {
 	return response == "y"
 }
 
-func getFolderFileNames(folderPath string) []string {
+// getFolderFileNames lists the files of a folder, sub-folders excluded.
+func getFolderFileNames(folderPath string) ([]string, error) {
 	files, err := os.ReadDir(folderPath)
 	if err != nil {
-		log.Fatalln("Error while reading the folder:", err)
+		return nil, fmt.Errorf("unable to read the folder: %w", err)
 	}
 
-	fileNames := make([]string, len(files))
-	folderCount := 0
-	for i, file := range files {
+	fileNames := make([]string, 0, len(files))
+	for _, file := range files {
 		if file.IsDir() {
-			folderCount++
 			continue
 		}
-		fileNames[i] = file.Name()
+		fileNames = append(fileNames, file.Name())
 	}
 
-	// Resize the slice to remove the skipped folders
-	fileNames = fileNames[:len(files)-folderCount]
-
-	return fileNames
+	return fileNames, nil
 }
