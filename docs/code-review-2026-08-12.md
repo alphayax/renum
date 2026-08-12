@@ -103,8 +103,18 @@ were fixed along the way:
 - **Coverage was 40%, with `main.go` at 0%** before this review: the three
   untested functions were `main`, `isOperationConfirmed` and
   `getFolderFileNames` — the last one being exactly where issue 1 lived.
-- **Copy-paste bug in `docker.yaml:52`**: the Docker Hub description is pushed
-  to `alphayax/chart-updater` instead of `alphayax/renum`.
+- **Copy-paste bug in `docker.yaml:52` — fixed**: the Docker Hub description was
+  pushed to `alphayax/chart-updater` instead of `alphayax/renum`, which failed
+  the job at the end of every release. The step still fails with `Forbidden`
+  once pointed at the right repository: `peter-evans/dockerhub-description`
+  needs a Docker Hub token with the read/write/**delete** scope (or the account
+  password), and `DOCKERHUB_TOKEN` does not have it. The image itself is pushed
+  fine — only the description sync is affected. **open**
+- **Expired release token — fixed**: `RENUM_GITHUB_TOKEN` had expired, so
+  GoReleaser built every binary and then failed to publish with a 401; no
+  release had been created since v1.0.10 in January 2024. The job already
+  declares `permissions: contents: write`, so it now uses the `GITHUB_TOKEN`
+  GitHub injects into the run and there is no long-lived secret left to renew.
 - **`.idea/` and `renum.iml` are versioned** while `.gitignore` only holds
   `dist/`.
 - **Go 1.20 is end of life** (`go.mod`, `Dockerfile`). Moving to 1.22+ is
