@@ -183,8 +183,10 @@ were fixed along the way:
   became `formats`.
 - `RenumFolder.FolderPath` was declared but never set — dead field, **removed**.
 - `Config` relies on the global `flag` set, so calling `NewConfig()` twice in a
-  single process panics, which makes the parsing hard to test properly. A
-  dedicated `flag.NewFlagSet` would fix it.
+  single process panics, which makes the parsing hard to test properly — **fixed**:
+  each `Config` carries its own `flag.NewFlagSet` and `Parse` takes the arguments
+  instead of reading `os.Args`, so the tests no longer rebuild `flag.CommandLine`
+  and rewrite `os.Args` to get a Config they can parse.
 
 ---
 
@@ -211,4 +213,6 @@ were fixed along the way:
 - **`renum -h` exits 1** and prints `invalid number of arguments` before the
   help: `Config.Parse` refuses an empty argument list before `main` gets to look
   at `config.Help`. The README documents `0` for a successful run, and asking for
-  the help is not a failure. **open**
+  the help is not a failure. **fixed**: the help is honoured before the folder is
+  required. An unknown option, which the global flag set answered with its own
+  exit code 2, now exits 1 like every other invalid argument.

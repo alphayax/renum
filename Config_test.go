@@ -2,8 +2,6 @@ package main
 
 import (
 	"bytes"
-	"flag"
-	"os"
 	"strings"
 	"testing"
 )
@@ -37,14 +35,36 @@ func TestNewConfig(t *testing.T) {
 
 }
 
+// The options used to be declared on the global flag set, which panics on the
+// second declaration of the same option in a process — the reason every test
+// here had to rebuild flag.CommandLine and rewrite os.Args before touching a
+// Config.
+func TestNewConfigTwiceInTheSameProcess(t *testing.T) {
+	first := NewConfig()
+	second := NewConfig()
+
+	if err := first.Parse([]string{"--season=2", "first"}); err != nil {
+		t.Fatalf("Expected no error, but got %v", err)
+	}
+	if err := second.Parse([]string{"--season=3", "second"}); err != nil {
+		t.Fatalf("Expected no error, but got %v", err)
+	}
+
+	if first.SeasonNum != 2 || first.Folder != "first" {
+		t.Errorf("Expected the first config to keep its own values, but got %d and %q",
+			first.SeasonNum, first.Folder)
+	}
+	if second.SeasonNum != 3 || second.Folder != "second" {
+		t.Errorf("Expected the second config to keep its own values, but got %d and %q",
+			second.SeasonNum, second.Folder)
+	}
+}
+
 func TestParseConfig(t *testing.T) {
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	config := NewConfig()
 
 	args := []string{"-season=2", "--episode=3", "--dry-run", "--help", "--force", "testFolder"}
-	os.Args = append(os.Args[:1], args...)
-
-	if err := config.Parse(); err != nil {
+	if err := config.Parse(args); err != nil {
 		t.Fatal(err)
 	}
 
@@ -74,29 +94,56 @@ func TestParseConfig(t *testing.T) {
 }
 
 func TestParseConfigBad(t *testing.T) {
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	config := NewConfig()
 
-	var args []string
-	os.Args = append(os.Args[:1], args...)
-
-	if err := config.Parse(); err == nil {
+	if err := config.Parse(nil); err == nil {
 		t.Errorf("Expected error, but got nil")
 	}
 }
 
+// "renum -h" used to be answered with "invalid number of arguments" and exit
+// code 1: the missing folder was checked before the help was even looked at.
+func TestParseConfigHelpWithoutAFolder(t *testing.T) {
+	for _, arg := range []string{"-h", "--help"} {
+		config := NewConfig()
+
+		if err := config.Parse([]string{arg}); err != nil {
+			t.Errorf("Expected %q to be accepted, but got %v", arg, err)
+		}
+		if !config.Help {
+			t.Errorf("Expected %q to ask for the help", arg)
+		}
+	}
+}
+
+// An unknown option is an error of ours to report: the flag set must not print
+// anything of its own on the way out.
+func TestParseConfigUnknownOption(t *testing.T) {
+	output := &bytes.Buffer{}
+	config := newConfig(output)
+
+	if err := config.Parse([]string{"--nope", "testFolder"}); err == nil {
+		t.Errorf("Expected an error on an unknown option, but got nil")
+	}
+	if output.Len() != 0 {
+		t.Errorf("Expected the flag set to stay silent, but it wrote %q", output.String())
+	}
+}
+
 func TestUsage(t *testing.T) {
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	config := NewConfig()
-	buf := new(bytes.Buffer)
-	flag.CommandLine.SetOutput(buf)
+	output := &bytes.Buffer{}
+	config := newConfig(output)
+
 	config.Usage()
-	str := buf.String()
-	lines := strings.Split(str, "\n")
+
+	lines := strings.Split(output.String(), "\n")
 	if lines[0] != "Usage: renum [options] <folderPath>" {
 		t.Errorf("Expected first line to be 'Usage: renum [options] <folderPath>', but got '%s'", lines[0])
 	}
 	if lines[1] != "Options:" {
 		t.Errorf("Expected second line to be 'Options:', but got '%s'", lines[1])
+	}
+	if !strings.Contains(output.String(), "-pattern") {
+		t.Errorf("Expected the options to be listed, but got '%s'", output.String())
 	}
 }

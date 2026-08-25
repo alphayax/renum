@@ -9,8 +9,8 @@ import (
 
 func main() {
 	config := NewConfig()
-	if err := config.Parse(); err != nil {
-		fmt.Println(err)
+	if err := config.Parse(os.Args[1:]); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		config.Usage()
 		os.Exit(1)
 	}

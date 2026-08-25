@@ -109,9 +109,10 @@ renamed, and they never get a name that would move them out of it.
 
 
 ### Exit codes
-- `0`: success, or nothing to rename.
-- `1`: invalid arguments, unreadable folder, invalid `--pattern`, unsafe batch,
-  operation declined at the confirmation prompt, or a rename failure.
+- `0`: success, nothing to rename, or `--help`.
+- `1`: invalid arguments, unknown option, unreadable folder, invalid `--pattern`,
+  unsafe batch, operation declined at the confirmation prompt, or a rename
+  failure.
 
 
 ## Examples
