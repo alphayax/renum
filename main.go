@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
+	"log/slog"
 	"os"
 	"strings"
 )
@@ -18,93 +18,84 @@ func main() {
 		config.Usage()
 		os.Exit(0)
 	}
-	if config.Verbose {
-		log.SetLevel(log.DebugLevel)
-	}
-	if config.Json {
-		log.SetFormatter(&log.JSONFormatter{})
-	}
+	setupLogger(config)
 	if config.DryRun {
-		log.Infoln("[DRY RUN] Dry run mode enabled, nothing will be changed")
+		slog.Info("[DRY RUN] Dry run mode enabled, nothing will be changed")
 	}
 
 	// Print config
-	log.WithFields(log.Fields{
-		"SeasonNumber":       config.SeasonNum,
-		"startEpisodeNumber": config.EpNum,
-		"folder":             config.Folder,
-		"dryRun":             config.DryRun,
-		"force":              config.Force,
-		"searchPattern":      config.SearchPattern,
-	}).Debugln("[Config]")
+	slog.Debug("[Config]",
+		"SeasonNumber", config.SeasonNum,
+		"startEpisodeNumber", config.EpNum,
+		"folder", config.Folder,
+		"dryRun", config.DryRun,
+		"force", config.Force,
+		"searchPattern", config.SearchPattern,
+	)
 
 	// Get the processors
 	processors, err := getProcessors(config)
 	if err != nil {
-		log.Fatalln(err)
+		fatal(err.Error())
 	}
 	for _, processor := range processors {
-		log.WithFields(log.Fields{
-			"searchRegex":   processor.SearchRegex,
-			"outputPattern": processor.OutputPattern,
-		}).Debugln("[Processor]")
+		slog.Debug("[Processor]",
+			// The regexp itself would be marshalled as an empty object in the
+			// JSON output: what is wanted here is the pattern it was built from.
+			"searchRegex", processor.SearchRegex.String(),
+			"outputPattern", processor.OutputPattern,
+		)
 	}
 
 	// Get the file names to process and compute the new names
 	fileNames, err := getFolderFileNames(config.Folder)
 	if err != nil {
-		log.Fatalln(err)
+		fatal(err.Error())
 	}
 	renumFolder := NewRenumFolder(config.SeasonNum, config.EpNum, fileNames, processors)
 	for _, file := range renumFolder.RenumFiles {
-		log.WithFields(log.Fields{
-			"oldName": file.OldName,
-			"newName": file.NewName,
-		}).Infoln("[Preview]")
+		slog.Info("[Preview]", "oldName", file.OldName, "newName", file.NewName)
 	}
 
 	// Refuse a plan that would overwrite files, before touching anything
 	plan := buildRenamePlan(renumFolder.RenumFiles)
 	if err := validateRenamePlan(config.Folder, plan); err != nil {
-		log.Errorln("The following renames would destroy files:")
+		slog.Error("The following renames would destroy files:")
 		for _, conflict := range strings.Split(err.Error(), "\n") {
-			log.Errorln("  -", conflict)
+			slog.Error("  - " + conflict)
 		}
-		log.Fatalln("Aborting, no file has been changed")
+		fatal("Aborting, no file has been changed")
 	}
 
 	if config.DryRun {
-		log.Infoln("[DRY RUN] Exiting...")
+		slog.Info("[DRY RUN] Exiting...")
 		os.Exit(0)
 	}
 
 	if len(plan) == 0 {
-		log.Infoln("Nothing to rename")
+		slog.Info("Nothing to rename")
 		os.Exit(0)
 	}
 
 	// Ask for confirmation
 	if !isOperationConfirmed(config.Force) {
-		log.Warningln("Aborting the operation...")
+		slog.Warn("Aborting the operation...")
 		os.Exit(1)
 	}
 
 	// Rename files
-	log.Infoln("Continuing the operation...")
+	slog.Info("Continuing the operation...")
 	for _, op := range plan {
-		log.WithFields(log.Fields{
-			"oldName": op.From,
-			"newName": op.To,
-		}).Debugln("[Rename]")
+		slog.Debug("[Rename]", "oldName", op.From, "newName", op.To)
 	}
 	if err := applyRenamePlan(config.Folder, plan); err != nil {
 		for _, failure := range strings.Split(err.Error(), "\n") {
-			log.Errorln(failure)
+			slog.Error(failure)
 		}
-		log.Fatalln("Some files could not be renamed")
+		fatal("Some files could not be renamed")
 	}
 
-	log.Infof("Renamed %d file(s)", len(plan))
+	slog.Info(fmt.Sprintf("Renamed %d file(s)", len(plan)))
 }
 
 func getProcessors(config *Config) ([]*Processor, error) {
@@ -116,22 +107,21 @@ func getProcessors(config *Config) ([]*Processor, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Infoln("Using custom search pattern:", config.SearchPattern)
+	slog.Info("Using a custom search pattern", "searchPattern", config.SearchPattern)
 
 	return []*Processor{processor}, nil
 }
 
 func isOperationConfirmed(force bool) bool {
 	if force {
-		log.Infoln("Force mode enabled, continuing the operation...")
+		slog.Info("Force mode enabled, continuing the operation...")
 		return true
 	}
 
 	fmt.Print("Do you want to continue the operation? (y/N): ")
 	var response string
 	if _, err := fmt.Scanln(&response); err != nil {
-		log.Debugln("Error while reading the response:", err)
-		log.Debugln("Assuming the response is 'n'")
+		slog.Debug("Unable to read the response, assuming it is 'n'", "error", err)
 		return false
 	}
 

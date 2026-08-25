@@ -170,9 +170,11 @@ were fixed along the way:
   `dist/` — **fixed**: both are untracked and ignored, along with the binary
   `go build` drops in the repository root.
 - **Go 1.20 is end of life** (`go.mod`, `Dockerfile`) — **fixed**: the module and
-  the builder image are on 1.22. logrus is still in maintenance mode and
-  `log/slog` has been in the standard library since 1.21, so the switch remains
-  **open**.
+  the builder image are on 1.22.
+- **logrus is in maintenance mode — fixed**: the logging moved to `log/slog`
+  (`Logger.go`), which the standard library has carried since 1.21. The level is
+  lower-cased to keep the `--json` output as it was, and `renum` now builds with
+  no dependency at all.
 - **Actions targeting Node 20 — fixed**: GitHub deprecated the runtime and every
   release ended with a warning. Both workflows are on the Node 24 majors
   (checkout v7, setup-go v7, goreleaser-action v7, docker/\*,
@@ -201,3 +203,12 @@ were fixed along the way:
   bumps. First release where both workflows are green end to end: the GitHub
   release carries its eight archives and the Docker image, its tags and its
   Hub description are all published.
+- **v1.1.2** (2026-08-25) — the natural order, the single substitution, the
+  ignored IDE files.
+
+## Found after the review
+
+- **`renum -h` exits 1** and prints `invalid number of arguments` before the
+  help: `Config.Parse` refuses an empty argument list before `main` gets to look
+  at `config.Help`. The README documents `0` for a successful run, and asking for
+  the help is not a failure. **open**
