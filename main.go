@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"strings"
@@ -81,7 +82,7 @@ func main() {
 	}
 
 	// Ask for confirmation
-	if !isOperationConfirmed(config.Force) {
+	if !isOperationConfirmed(config.Force, os.Stdin) {
 		slog.Warn("Aborting the operation...")
 		os.Exit(1)
 	}
@@ -126,7 +127,10 @@ func joinedErrors(err error) []error {
 	return []error{err}
 }
 
-func isOperationConfirmed(force bool) bool {
+// isOperationConfirmed asks before anything is renamed. Anything but a plain
+// "y" declines, an unreadable answer included: the safe answer is the one that
+// changes nothing.
+func isOperationConfirmed(force bool, in io.Reader) bool {
 	if force {
 		slog.Info("Force mode enabled, continuing the operation...")
 		return true
@@ -134,7 +138,7 @@ func isOperationConfirmed(force bool) bool {
 
 	fmt.Print("Do you want to continue the operation? (y/N): ")
 	var response string
-	if _, err := fmt.Scanln(&response); err != nil {
+	if _, err := fmt.Fscanln(in, &response); err != nil {
 		slog.Debug("Unable to read the response, assuming it is 'n'", "error", err)
 		return false
 	}

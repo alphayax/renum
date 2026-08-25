@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -81,6 +82,32 @@ func TestGetProcessorsUsesTheCustomPattern(t *testing.T) {
 func TestGetProcessorsRejectsAnInvalidPattern(t *testing.T) {
 	if _, err := getProcessors(&Config{SearchPattern: "S[0-9"}); err == nil {
 		t.Errorf("Expected an invalid pattern to return an error")
+	}
+}
+
+// The last gate before anything is renamed: anything but a plain "y" — an
+// answer that cannot even be read included — must decline.
+func TestIsOperationConfirmed(t *testing.T) {
+	cases := map[string]struct {
+		force bool
+		input string
+		want  bool
+	}{
+		"force":         {force: true, input: "", want: true},
+		"y":             {input: "y\n", want: true},
+		"uppercase Y":   {input: "Y\n", want: true},
+		"padded y":      {input: "  y  \n", want: true},
+		"n":             {input: "n\n", want: false},
+		"empty line":    {input: "\n", want: false},
+		"closed input":  {input: "", want: false},
+		"anything else": {input: "yes\n", want: false},
+	}
+
+	for name, testCase := range cases {
+		got := isOperationConfirmed(testCase.force, strings.NewReader(testCase.input))
+		if got != testCase.want {
+			t.Errorf("%s: expected %t, but got %t", name, testCase.want, got)
+		}
 	}
 }
 
