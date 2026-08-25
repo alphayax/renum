@@ -111,11 +111,29 @@ renumbered the "2" of `serie 1 - part 2.mkv` as a second episode.
 **Fix:** only the first match is replaced, through `FindStringSubmatchIndex` plus
 `ExpandString` — which keeps the `$1` semantics the separator pattern needs.
 
+### 8. The listing order numbered the wrong episodes — `main.go:113` — fixed
+
+`os.ReadDir` sorts lexicographically, in which `ep 10.mkv` comes before
+`ep 2.mkv`. Every folder whose numbers are not zero-padded was therefore
+renumbered in the wrong order:
+
+```
+serie 1.mkv  serie 2.mkv  serie 3.mkv  serie 10.mkv  serie 11.mkv
+
+serie 1.mkv  -> serie S04E01.mkv
+serie 10.mkv -> serie S04E02.mkv     <- episode 10 numbered as the second
+serie 11.mkv -> serie S04E03.mkv
+serie 2.mkv  -> serie S04E04.mkv
+```
+
+**Fix:** the listing is sorted in the natural order (`NaturalOrder.go`), where
+the digit runs of a name are compared by value. Everything that is not a number
+keeps the byte order `os.ReadDir` used, and a run longer than an `int64` is
+still compared correctly since the digits are compared as written, not parsed.
+
 ### Still open
 
-| # | Issue | Location |
-|---|---|---|
-| 8 | `os.ReadDir` sorts lexicographically, so `ep 10.mkv` comes before `ep 2.mkv`. Without natural sorting the numbering is wrong for any non zero-padded name. | `main.go:113` |
+Nothing left from the numbered list.
 
 Issues 9 and 10 sat inside the code rewritten for the critical fixes, so they
 were fixed along the way:
@@ -134,7 +152,8 @@ were fixed along the way:
   would have caught several of the issues above.
 - **Coverage was 40%, with `main.go` at 0%** before this review: the three
   untested functions were `main`, `isOperationConfirmed` and
-  `getFolderFileNames` — the last one being exactly where issue 1 lived.
+  `getFolderFileNames` — the last one being exactly where issue 1 lived. It is
+  at 76% now, `main` itself being what is left untested.
 - **Copy-paste bug in `docker.yaml:52` — fixed**: the Docker Hub description was
   pushed to `alphayax/chart-updater` instead of `alphayax/renum`, which failed
   the job at the end of every release. Once pointed at the right repository the

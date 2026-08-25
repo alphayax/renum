@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 )
 
@@ -28,6 +29,22 @@ func TestGetFolderFileNamesSkipsSubFolders(t *testing.T) {
 		if fileNames[i] != want {
 			t.Errorf("Expected file %d to be %q, but got %q", i, want, fileNames[i])
 		}
+	}
+}
+
+// os.ReadDir hands back the lexicographic order, in which "ep 10.mkv" precedes
+// "ep 2.mkv" and every episode gets the number of another.
+func TestGetFolderFileNamesUsesTheNaturalOrder(t *testing.T) {
+	folder := makeFolder(t, "ep 10.mkv", "ep 2.mkv", "ep 1.mkv")
+
+	fileNames, err := getFolderFileNames(folder)
+	if err != nil {
+		t.Fatalf("Expected no error, but got %v", err)
+	}
+
+	expected := []string{"ep 1.mkv", "ep 2.mkv", "ep 10.mkv"}
+	if !slices.Equal(fileNames, expected) {
+		t.Errorf("Expected %v, but got %v", expected, fileNames)
 	}
 }
 

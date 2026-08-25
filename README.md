@@ -81,6 +81,11 @@ Show S01E02.srt     ->  Show S02E02.srt
 A file that no pattern matches is not an episode: it is left untouched and does
 not consume a number, so a stray `cover.jpg` no longer shifts the whole folder.
 
+The episodes are numbered in their natural order, the one where the numbers
+inside a name count as numbers: `ep 2.mkv` is numbered before `ep 10.mkv`, even
+though the folder lists it after. Numbers that are not zero-padded are therefore
+numbered in the order you read them.
+
 > A subtitle carrying a language in its name, such as `Show S01E01.fr.srt`,
 > counts as its own episode: only the last extension is dropped when grouping.
 

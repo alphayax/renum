@@ -139,7 +139,8 @@ func isOperationConfirmed(force bool) bool {
 	return response == "y"
 }
 
-// getFolderFileNames lists the files of a folder, sub-folders excluded.
+// getFolderFileNames lists the files of a folder, sub-folders excluded, in the
+// order the episodes are numbered in.
 func getFolderFileNames(folderPath string) ([]string, error) {
 	files, err := os.ReadDir(folderPath)
 	if err != nil {
@@ -153,6 +154,10 @@ func getFolderFileNames(folderPath string) ([]string, error) {
 		}
 		fileNames = append(fileNames, file.Name())
 	}
+
+	// os.ReadDir sorts lexicographically, which numbers "ep 10.mkv" before
+	// "ep 2.mkv".
+	sortNaturally(fileNames)
 
 	return fileNames, nil
 }
