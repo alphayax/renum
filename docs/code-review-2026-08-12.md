@@ -102,11 +102,19 @@ extension included.
 **Fix:** the separators are captured and put back as they were. The README
 example is unaffected, `_1086_` still yields `_S12E01_`.
 
+### 7. Every occurrence was substituted — `Processor.go:26` — fixed
+
+`ReplaceAllString` rewrote each match of the pattern, so `S01E01 - rerun of
+S01E01.mkv` became `S02E03 - rerun of S02E03.mkv`, and the separator pattern
+renumbered the "2" of `serie 1 - part 2.mkv` as a second episode.
+
+**Fix:** only the first match is replaced, through `FindStringSubmatchIndex` plus
+`ExpandString` — which keeps the `$1` semantics the separator pattern needs.
+
 ### Still open
 
 | # | Issue | Location |
 |---|---|---|
-| 7 | `ReplaceAllString` replaces *every* occurrence: `S01E01 - rerun S01E01.mkv` is substituted twice. A single replacement would be enough. | `Processor.go:26` |
 | 8 | `os.ReadDir` sorts lexicographically, so `ep 10.mkv` comes before `ep 2.mkv`. Without natural sorting the numbering is wrong for any non zero-padded name. | `main.go:113` |
 
 Issues 9 and 10 sat inside the code rewritten for the critical fixes, so they
@@ -140,7 +148,8 @@ were fixed along the way:
   declares `permissions: contents: write`, so it now uses the `GITHUB_TOKEN`
   GitHub injects into the run and there is no long-lived secret left to renew.
 - **`.idea/` and `renum.iml` are versioned** while `.gitignore` only holds
-  `dist/`.
+  `dist/` — **fixed**: both are untracked and ignored, along with the binary
+  `go build` drops in the repository root.
 - **Go 1.20 is end of life** (`go.mod`, `Dockerfile`) — **fixed**: the module and
   the builder image are on 1.22. logrus is still in maintenance mode and
   `log/slog` has been in the standard library since 1.21, so the switch remains

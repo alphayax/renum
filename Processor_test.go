@@ -56,6 +56,27 @@ func TestReplace(t *testing.T) {
 	}
 }
 
+// A name holds one episode number; a second occurrence is part of the title and
+// must survive untouched.
+func TestReplaceOnlyTheFirstOccurrence(t *testing.T) {
+	p := MustNewProcessor("S[0-9]+E[0-9]+", "S%02dE%02d")
+
+	got := p.Replace("S01E01 - rerun of S01E01.mkv", 2, 3)
+	if want := "S02E03 - rerun of S01E01.mkv"; got != want {
+		t.Errorf("Expected Replace to return %q, but got %q", want, got)
+	}
+}
+
+// Replace is normally called behind Match, but it must not mangle a name it
+// cannot find the pattern in.
+func TestReplaceWithoutAMatch(t *testing.T) {
+	p := MustNewProcessor("S[0-9]+E[0-9]+", "S%02dE%02d")
+
+	if got := p.Replace("cover.jpg", 2, 3); got != "cover.jpg" {
+		t.Errorf("Expected Replace to leave 'cover.jpg' alone, but got %q", got)
+	}
+}
+
 func TestGetDefaultProcessors(t *testing.T) {
 	if len(getDefaultProcessors()) == 0 {
 		t.Errorf("Expected the default processors not to be empty")
@@ -70,6 +91,9 @@ func TestDefaultProcessorsKeepTheExtension(t *testing.T) {
 		"serie_1.mkv":                     "serie_S01E01.mkv",
 		"serie 1 x.mkv":                   "serie S01E01 x.mkv",
 		"[Fansub]_Show_1086_[VOSTFR].mkv": "[Fansub]_Show_S01E01_[VOSTFR].mkv",
+		// The separator pattern matches twice here: only the first number is
+		// the episode, "part 2" belongs to the title.
+		"serie 1 - part 2.mkv": "serie S01E01 - part 2.mkv",
 	}
 
 	for oldName, want := range cases {

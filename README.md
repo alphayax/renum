@@ -58,6 +58,10 @@ renum [options] /path/to/directory
   The separators around the number are kept as they were, so the extension of
   `serie 1.mkv` survives.
 
+Only the first occurrence found in a name is renumbered: a name carries a single
+episode number, so in `S01E01 - rerun of S01E01.mkv` the second one is part of
+the title and is left as it is.
+
 > You can use your own file pattern detection by using the `--pattern` flag with your custom regex.
 > For example: `--pattern "Season.[0-9]+.Ep.[0-9]+"` to match "Season 4 Ep 21"
 

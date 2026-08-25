@@ -43,9 +43,22 @@ func (p *Processor) Match(oldName string) bool {
 	return p.SearchRegex.MatchString(oldName)
 }
 
+// Replace renumbers the first occurrence of the pattern and leaves the rest of
+// the name untouched. A name carries at most one episode number; any further
+// occurrence belongs to the title, as in "S01E01 - rerun of S01E01.mkv", and
+// renumbering it too would corrupt that title.
 func (p *Processor) Replace(oldName string, seasonNum uint, epNum uint) string {
+	match := p.SearchRegex.FindStringSubmatchIndex(oldName)
+	if match == nil {
+		return oldName
+	}
+
 	replacement := fmt.Sprintf(p.OutputPattern, seasonNum, epNum)
-	return p.SearchRegex.ReplaceAllString(oldName, replacement)
+	// ExpandString gives the replacement the same "$1" semantics it had with
+	// ReplaceAllString, which the separator pattern below relies on.
+	expanded := p.SearchRegex.ExpandString(nil, replacement, oldName, match)
+
+	return oldName[:match[0]] + string(expanded) + oldName[match[1]:]
 }
 
 func getDefaultProcessors() []*Processor {
