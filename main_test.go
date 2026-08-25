@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"slices"
@@ -80,5 +81,25 @@ func TestGetProcessorsUsesTheCustomPattern(t *testing.T) {
 func TestGetProcessorsRejectsAnInvalidPattern(t *testing.T) {
 	if _, err := getProcessors(&Config{SearchPattern: "S[0-9"}); err == nil {
 		t.Errorf("Expected an invalid pattern to return an error")
+	}
+}
+
+// errors.Join glues its errors with a newline, and a file name may hold one:
+// the messages are taken apart, never split back on the newline.
+func TestJoinedErrors(t *testing.T) {
+	first := errors.New("first")
+	second := errors.New("a name\nwith a newline")
+
+	joined := joinedErrors(errors.Join(first, second))
+	if len(joined) != 2 {
+		t.Fatalf("Expected 2 errors, but got %d: %v", len(joined), joined)
+	}
+	if joined[0] != first || joined[1] != second {
+		t.Errorf("Expected the errors as they were joined, but got %v", joined)
+	}
+
+	alone := joinedErrors(first)
+	if len(alone) != 1 || alone[0] != first {
+		t.Errorf("Expected a lone error to come back as it is, but got %v", alone)
 	}
 }

@@ -61,8 +61,8 @@ func main() {
 	plan := buildRenamePlan(renumFolder.RenumFiles)
 	if err := validateRenamePlan(config.Folder, plan); err != nil {
 		slog.Error("The following renames would destroy files:")
-		for _, conflict := range strings.Split(err.Error(), "\n") {
-			slog.Error("  - " + conflict)
+		for _, conflict := range joinedErrors(err) {
+			slog.Error("  - " + conflict.Error())
 		}
 		fatal("Aborting, no file has been changed")
 	}
@@ -89,8 +89,8 @@ func main() {
 		slog.Debug("[Rename]", "oldName", op.From, "newName", op.To)
 	}
 	if err := applyRenamePlan(config.Folder, plan); err != nil {
-		for _, failure := range strings.Split(err.Error(), "\n") {
-			slog.Error(failure)
+		for _, failure := range joinedErrors(err) {
+			slog.Error(failure.Error())
 		}
 		fatal("Some files could not be renamed")
 	}
@@ -110,6 +110,17 @@ func getProcessors(config *Config) ([]*Processor, error) {
 	slog.Info("Using a custom search pattern", "searchPattern", config.SearchPattern)
 
 	return []*Processor{processor}, nil
+}
+
+// joinedErrors takes apart what errors.Join gathered, so that each error is
+// reported as its own message. Splitting the joined text on "\n" cut a message
+// in two as soon as a file name held a newline — which a file name may.
+func joinedErrors(err error) []error {
+	if joined, ok := err.(interface{ Unwrap() []error }); ok {
+		return joined.Unwrap()
+	}
+
+	return []error{err}
 }
 
 func isOperationConfirmed(force bool) bool {
