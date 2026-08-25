@@ -1,3 +1,3 @@
 module github.com/alphayax/renum
 
-go 1.26
+go 1.27
