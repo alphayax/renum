@@ -88,6 +88,13 @@ func (c *Config) Parse(args []string) error {
 	return nil
 }
 
+// SetOutput chooses where Usage writes. A Config reports its parsing errors on
+// the standard error output; the help someone asked for goes to the standard
+// output instead, which is what main switches it to.
+func (c *Config) SetOutput(output io.Writer) {
+	c.output = output
+}
+
 func (c *Config) Usage() {
 	// Printing the defaults is the one moment the flag set is given the output
 	// back.

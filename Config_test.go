@@ -130,6 +130,24 @@ func TestParseConfigUnknownOption(t *testing.T) {
 	}
 }
 
+// "renum --help > help.txt" used to write the help on the standard error output
+// and leave the file empty.
+func TestSetOutput(t *testing.T) {
+	stderr := &bytes.Buffer{}
+	stdout := &bytes.Buffer{}
+	config := newConfig(stderr)
+
+	config.SetOutput(stdout)
+	config.Usage()
+
+	if stdout.Len() == 0 {
+		t.Errorf("Expected the usage on the chosen output, but it was empty")
+	}
+	if stderr.Len() != 0 {
+		t.Errorf("Expected nothing on the first output, but it wrote %q", stderr.String())
+	}
+}
+
 func TestUsage(t *testing.T) {
 	output := &bytes.Buffer{}
 	config := newConfig(output)

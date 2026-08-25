@@ -15,6 +15,9 @@ func main() {
 		os.Exit(1)
 	}
 	if config.Help {
+		// Asking for the help is not a failure: it goes to the standard output,
+		// so that "renum --help | less" and "renum --help > help.txt" see it.
+		config.SetOutput(os.Stdout)
 		config.Usage()
 		os.Exit(0)
 	}
