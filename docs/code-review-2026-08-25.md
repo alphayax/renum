@@ -189,5 +189,5 @@ v1.1.2. Since then:
   every push and pull request.
 - **v1.2.1** (2026-08-25) — Go 1.26 then 1.27, in `go.mod` and in the builder
   image. The state this review starts from.
-- **next** — the four fixes above, the limitations the README was missing, and
-  the confirmation prompt under test.
+- **v1.2.2** (2026-08-25) — the four fixes above, the limitations the README was
+  missing, and the confirmation prompt under test.
