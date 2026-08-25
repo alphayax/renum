@@ -147,9 +147,11 @@ were fixed along the way:
 
 ## Tooling and quality — open
 
-- **No test CI.** Both workflows only trigger on tags; nothing runs on push or
-  pull request. A `go test` + `go vet` + `golangci-lint` job on `pull_request`
-  would have caught several of the issues above.
+- **No test CI** — **fixed**: both workflows only triggered on tags, so nothing
+  ran on a push or a pull request. `test.yml` runs `gofmt`, `go vet`, `go test
+  -race` with the coverage, and `golangci-lint`, on every pull request and on
+  every push to `main`. Go comes from `go-version-file: go.mod`, so what is
+  tested is the version the module promises to build with.
 - **Coverage was 40%, with `main.go` at 0%** before this review: the three
   untested functions were `main`, `isOperationConfirmed` and
   `getFolderFileNames` — the last one being exactly where issue 1 lived. It is
