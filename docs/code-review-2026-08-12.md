@@ -129,11 +129,11 @@ were fixed along the way:
   `getFolderFileNames` — the last one being exactly where issue 1 lived.
 - **Copy-paste bug in `docker.yaml:52` — fixed**: the Docker Hub description was
   pushed to `alphayax/chart-updater` instead of `alphayax/renum`, which failed
-  the job at the end of every release. The step still fails with `Forbidden`
-  once pointed at the right repository: `peter-evans/dockerhub-description`
-  needs a Docker Hub token with the read/write/**delete** scope (or the account
-  password), and `DOCKERHUB_TOKEN` does not have it. The image itself is pushed
-  fine — only the description sync is affected. **open**
+  the job at the end of every release. Once pointed at the right repository the
+  step still failed with `Forbidden`, because `peter-evans/dockerhub-description`
+  needs a Docker Hub token with the read/write/**delete** scope and
+  `DOCKERHUB_TOKEN` did not have it. The scope was widened on 2026-08-25 and the
+  whole Docker workflow is green on v1.1.1. **fixed**
 - **Expired release token — fixed**: `RENUM_GITHUB_TOKEN` had expired, so
   GoReleaser built every binary and then failed to publish with a 401; no
   release had been created since v1.0.10 in January 2024. The job already
@@ -141,9 +141,16 @@ were fixed along the way:
   GitHub injects into the run and there is no long-lived secret left to renew.
 - **`.idea/` and `renum.iml` are versioned** while `.gitignore` only holds
   `dist/`.
-- **Go 1.20 is end of life** (`go.mod`, `Dockerfile`). Moving to 1.22+ is
-  overdue; logrus is in maintenance mode and `log/slog` has been in the
-  standard library since 1.21.
+- **Go 1.20 is end of life** (`go.mod`, `Dockerfile`) — **fixed**: the module and
+  the builder image are on 1.22. logrus is still in maintenance mode and
+  `log/slog` has been in the standard library since 1.21, so the switch remains
+  **open**.
+- **Actions targeting Node 20 — fixed**: GitHub deprecated the runtime and every
+  release ended with a warning. Both workflows are on the Node 24 majors
+  (checkout v7, setup-go v7, goreleaser-action v7, docker/\*,
+  dockerhub-description v5). goreleaser-action v7 pins GoReleaser to `~> v2`, so
+  `.goreleaser.yaml` moved to `version: 2` and the deprecated `archives.format`
+  became `formats`.
 - `RenumFolder.FolderPath` was declared but never set — dead field, **removed**.
 - `Config` relies on the global `flag` set, so calling `NewConfig()` twice in a
   single process panics, which makes the parsing hard to test properly. A
@@ -157,3 +164,12 @@ were fixed along the way:
 2. Test CI on pull requests, plus regression tests on the rename planner.
 3. Issues 5 and 6 (subtitles, extension) — the most visible in daily use.
 4. Cleanup: `filepath.Join`, `.gitignore`, Go 1.22, the Docker workflow.
+
+## Releases
+
+- **v1.1.0** (2026-08-12) — the critical fixes. Tagged before the companion-file
+  fix landed, so `f3d2f86` shipped in no binary.
+- **v1.1.1** (2026-08-25) — companion files and extensions, Go 1.22, the action
+  bumps. First release where both workflows are green end to end: the GitHub
+  release carries its eight archives and the Docker image, its tags and its
+  Hub description are all published.
