@@ -1,2 +1,10 @@
 
 dist/
+
+# Binary produced by "go build" in the repository root
+/renum
+/renum.exe
+
+# JetBrains project files: personal to whoever opens the project
+.idea/
+*.iml
