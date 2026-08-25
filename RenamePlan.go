@@ -78,7 +78,11 @@ func applyRenamePlan(folderPath string, plan []renameOp) error {
 	pending := make([]renameOp, len(plan))
 	copy(pending, plan)
 
-	parked := make(map[string]bool, len(plan))
+	// origins maps the temporary name of a parked file to the name it had
+	// before the batch started, so that a file whose rename turns out to be
+	// impossible can be put back instead of being left aside under a name
+	// nobody would recognise.
+	origins := make(map[string]string, len(plan))
 	var failures []error
 
 	for len(pending) > 0 {
@@ -105,8 +109,13 @@ func applyRenamePlan(folderPath string, plan []renameOp) error {
 			// Every remaining rename waits for another one: the batch contains a
 			// cycle. Parking one file frees its name and unblocks the chain.
 			op := blocked[0]
-			if parked[op.To] {
-				failures = append(failures, fmt.Errorf("unable to resolve the rename of %q to %q", op.From, op.To))
+			if origin, alreadyParked := origins[op.From]; alreadyParked {
+				// Parking the file did not free its target: nothing else will,
+				// so the rename is given up and the file goes back where it was.
+				failures = append(failures, fmt.Errorf("unable to resolve the rename of %q to %q", origin, op.To))
+				if err := unparkFile(folderPath, op.From, origin); err != nil {
+					failures = append(failures, err)
+				}
 				blocked = blocked[1:]
 			} else {
 				tempName, err := parkFile(folderPath, op.From)
@@ -114,7 +123,7 @@ func applyRenamePlan(folderPath string, plan []renameOp) error {
 					failures = append(failures, err)
 					blocked = blocked[1:]
 				} else {
-					parked[op.To] = true
+					origins[tempName] = op.From
 					blocked[0].From = tempName
 				}
 			}
@@ -151,4 +160,21 @@ func parkFile(folderPath string, name string) (string, error) {
 	}
 
 	return "", fmt.Errorf("unable to find a free temporary name for %q", name)
+}
+
+// unparkFile puts a parked file back under the name it had before the batch
+// started. A rename that cannot be applied must leave the file where the user
+// left it, not under the hidden temporary name it was moved to.
+func unparkFile(folderPath string, tempName string, originalName string) error {
+	if _, err := os.Lstat(filepath.Join(folderPath, originalName)); err == nil {
+		return fmt.Errorf("%q is left under the temporary name %q: something else took its name", originalName, tempName)
+	}
+
+	from := filepath.Join(folderPath, tempName)
+	to := filepath.Join(folderPath, originalName)
+	if err := os.Rename(from, to); err != nil {
+		return fmt.Errorf("unable to move %q back to %q: %w", tempName, originalName, err)
+	}
+
+	return nil
 }

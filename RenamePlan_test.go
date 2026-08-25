@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -194,6 +195,51 @@ func TestApplyRenamePlanReportsAMissingSource(t *testing.T) {
 	content := folderContent(t, folder)
 	if content["S01E02.mkv"] != "a.mkv" {
 		t.Errorf("Expected a.mkv to be renamed despite the failure, but got %v", content)
+	}
+}
+
+// A rename that can never be applied used to leave its file parked under the
+// hidden temporary name it had been moved to: the file was still there, but
+// under a name nobody would look for. Here "b.mkv" is never moved away — the
+// rename that would have freed it fails — so "a.mkv" has to stay "a.mkv".
+func TestApplyRenamePlanPutsAnUnresolvableFileBack(t *testing.T) {
+	folder := makeFolder(t, "a.mkv", "b.mkv")
+	plan := []renameOp{
+		{From: "a.mkv", To: "b.mkv"},
+		{From: "ghost.mkv", To: "z.mkv"},
+	}
+
+	if err := applyRenamePlan(folder, plan); err == nil {
+		t.Fatalf("Expected the impossible rename to be reported")
+	}
+
+	content := folderContent(t, folder)
+	if len(content) != 2 {
+		t.Fatalf("Expected 2 files, but got %v", content)
+	}
+	if content["a.mkv"] != "a.mkv" || content["b.mkv"] != "b.mkv" {
+		t.Errorf("Expected both files under their own name, but got %v", content)
+	}
+}
+
+// The failure must name the file the user knows, not the temporary name it was
+// parked under along the way.
+func TestApplyRenamePlanReportsTheOriginalName(t *testing.T) {
+	folder := makeFolder(t, "a.mkv", "b.mkv")
+	plan := []renameOp{
+		{From: "a.mkv", To: "b.mkv"},
+		{From: "ghost.mkv", To: "z.mkv"},
+	}
+
+	err := applyRenamePlan(folder, plan)
+	if err == nil {
+		t.Fatalf("Expected an error")
+	}
+	if !strings.Contains(err.Error(), `unable to resolve the rename of "a.mkv" to "b.mkv"`) {
+		t.Errorf("Expected the original name in the failure, but got %v", err)
+	}
+	if strings.Contains(err.Error(), tempPrefix) {
+		t.Errorf("Expected no temporary name in the failure, but got %v", err)
 	}
 }
 
