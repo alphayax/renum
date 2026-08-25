@@ -34,6 +34,10 @@ You can also use Renum with Docker. To do so, you can run the following command:
 docker run --rm -it -v /path/to/directory:/data alphayax/renum:latest [options] /data
 ```
 
+The `-it` matters: without a terminal there is nobody to answer the confirmation
+prompt, and Renum stops without renaming anything. In a script, drop the `-it`
+and pass `--force`.
+
 
 ## Usage
 To use Renum, run the following command by passing the path to the directory containing the files you want to rename as last argument:
@@ -44,7 +48,7 @@ renum [options] /path/to/directory
 ### Options
 - `-s <NUM>`, `--season <NUM>`: The season number to use.
 - `-e <NUM>`, `--episode <NUM>`: The episode number to start from. Will be incremented for each file.
-- `-h`, `--help`: Display the help message.
+- `-h`, `--help`: Display the help message, on the standard output.
 - `--force`: Don't ask for confirmation before applying the changes.
 - `--verbose`: Increase logs verbosity.
 - `--json`: Display logs in JSON format.
@@ -91,6 +95,26 @@ numbered in the order you read them.
 > counts as its own episode: only the last extension is dropped when grouping.
 
 
+### What counts as an episode
+An episode is whatever a pattern matches, and the patterns only look at names. A
+file that happens to carry a number where a pattern expects one is therefore
+taken for an episode, takes a number, and shifts the ones after it:
+
+```
+Season 1 Poster.jpg  ->  Season S02E01 Poster.jpg
+Show S01E01.mkv      ->  Show S02E02.mkv
+```
+
+This is what `--dry-run` is for: it shows the whole batch before anything is
+renamed. `--pattern` narrows the matching down to the one shape your files use.
+
+Two more things Renum takes for files, because the folder lists them as such:
+- hidden files, which are renumbered like any other;
+- symbolic links, which are renamed themselves — a link pointing at a file of
+  the same folder by a relative name ends up dangling, since the file it names
+  has been renamed too.
+
+
 ### Safety
 Renaming a batch of files can silently destroy data, so Renum checks the whole
 batch **before** touching a single file, and aborts without any change if:
@@ -107,6 +131,11 @@ the original `S01E02`.
 
 Sub-folders are ignored: only the files directly inside the given directory are
 renamed, and they never get a name that would move them out of it.
+
+Should a rename fail anyway — a permission, a full disk, a file pulled from
+under Renum while it works — the ones that can still be applied are, every
+failure is reported, and Renum leaves with a non-zero exit code. No file is left
+behind under the temporary name Renum uses internally to untangle a batch.
 
 
 ### Exit codes
@@ -143,9 +172,22 @@ To run the tests for Renum, navigate to the project directory and run the follow
 go test ./...
 ```
 
+What the CI runs on every push and every pull request is the same suite under
+the race detector, plus `gofmt`, `go vet` and `golangci-lint`:
+```bash
+go test -race ./...
+```
+
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+The code reviews the project went through are kept in [`docs/`](./docs), each
+one listing what was found, what was fixed, and what is still open.
+
+
+## License
+Renum is released under the [MIT License](./LICENSE).
 
 
 ## Sponsoring
